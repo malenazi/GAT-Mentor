@@ -1,0 +1,19 @@
+[
+  {"id": 1, "topic_id": 1, "name": "Synonyms", "slug": "synonyms", "description": "Identify words with similar meanings", "display_order": 1},
+  {"id": 2, "topic_id": 1, "name": "Antonyms", "slug": "antonyms", "description": "Identify words with opposite meanings", "display_order": 2},
+  {"id": 3, "topic_id": 1, "name": "Analogies", "slug": "analogies", "description": "Identify word pair relationships", "display_order": 3},
+  {"id": 4, "topic_id": 1, "name": "Sentence Completion", "slug": "sentence-completion", "description": "Fill in blanks with appropriate words", "display_order": 4},
+  {"id": 5, "topic_id": 1, "name": "Reading Comprehension", "slug": "reading-comprehension", "description": "Understand and analyze written passages", "display_order": 5},
+
+  {"id": 6, "topic_id": 2, "name": "Arithmetic", "slug": "arithmetic", "description": "Basic operations, fractions, decimals", "display_order": 1},
+  {"id": 7, "topic_id": 2, "name": "Algebra", "slug": "algebra", "description": "Equations, exponents, inequalities", "display_order": 2},
+  {"id": 8, "topic_id": 2, "name": "Geometry", "slug": "geometry", "description": "Shapes, angles, area, perimeter", "display_order": 3},
+  {"id": 9, "topic_id": 2, "name": "Ratios & Percentages", "slug": "ratios-percentages", "description": "Ratios, proportions, percentage calculations", "display_order": 4},
+  {"id": 10, "topic_id": 2, "name": "Data Interpretation", "slug": "data-interpretation", "description": "Read and analyze charts, tables, graphs", "display_order": 5},
+
+  {"id": 11, "topic_id": 3, "name": "Logical Deduction", "slug": "logical-deduction", "description": "Draw conclusions from given statements", "display_order": 1},
+  {"id": 12, "topic_id": 3, "name": "Syllogisms", "slug": "syllogisms", "description": "Evaluate logical arguments with premises and conclusions", "display_order": 2},
+  {"id": 13, "topic_id": 3, "name": "Pattern Recognition", "slug": "pattern-recognition", "description": "Identify number and letter patterns", "display_order": 3},
+  {"id": 14, "topic_id": 3, "name": "Ordering & Arrangement", "slug": "ordering-arrangement", "description": "Arrange items based on constraints", "display_order": 4},
+  {"id": 15, "topic_id": 3, "name": "Puzzles & Grouping", "slug": "puzzles-grouping", "description": "Solve logic puzzles and classify items into groups", "display_order": 5}
+]

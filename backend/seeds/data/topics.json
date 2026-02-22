@@ -1,0 +1,5 @@
+[
+  {"id": 1, "name": "Verbal Reasoning", "slug": "verbal", "description": "Tests vocabulary, reading comprehension, and verbal logic", "weight_in_exam": 0.35, "display_order": 1},
+  {"id": 2, "name": "Quantitative Reasoning", "slug": "quantitative", "description": "Tests mathematical aptitude and numerical problem solving", "weight_in_exam": 0.35, "display_order": 2},
+  {"id": 3, "name": "Analytical Reasoning", "slug": "analytical", "description": "Tests logical thinking, pattern recognition, and deduction", "weight_in_exam": 0.30, "display_order": 3}
+]

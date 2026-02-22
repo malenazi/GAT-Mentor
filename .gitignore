@@ -1,0 +1,57 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+
+# Virtual environment
+venv/
+.venv/
+env/
+
+# Database
+*.db
+*.sqlite3
+
+# Environment files
+.env
+!.env.example
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Flutter
+frontend/gat_mentor/.dart_tool/
+frontend/gat_mentor/.packages
+frontend/gat_mentor/.flutter-plugins
+frontend/gat_mentor/.flutter-plugins-dependencies
+
+# Exclude all Flutter builds EXCEPT web (needed for Docker deployment)
+frontend/gat_mentor/build/app/
+frontend/gat_mentor/build/linux/
+frontend/gat_mentor/build/windows/
+frontend/gat_mentor/build/macos/
+frontend/gat_mentor/build/ios/
+frontend/gat_mentor/build/android/
+
+# Logs
+*.log
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.claude/
