@@ -36,6 +36,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     return level[0].toUpperCase() + level.substring(1);
   }
 
+  String _settingsPath() {
+    final location = GoRouterState.of(context).matchedLocation;
+    return location.startsWith('/admin')
+        ? '/admin/profile/settings'
+        : '/profile/settings';
+  }
+
   Future<void> _confirmLogout() async {
     final shouldLogout = await showDialog<bool>(
       context: context,
@@ -280,38 +287,69 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   Widget _buildSettingsList(ProfileState state) {
     final user = state.user;
-    return Card(
-      child: Column(
-        children: [
-          _SettingsTile(
-            icon: Icons.book_outlined,
-            title: 'Study Plan',
-            subtitle: 'Focus: ${_capitalizeLevel(user?.studyFocus ?? 'Both')}',
-            onTap: () => context.go('/profile/settings'),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            const Text(
+              'Study Settings',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: AppColors.textPrimary,
+              ),
+            ),
+            const Spacer(),
+            TextButton.icon(
+              onPressed: () => context.go(_settingsPath()),
+              icon: const Icon(Icons.edit_outlined, size: 16),
+              label: const Text('Edit All'),
+              style: TextButton.styleFrom(
+                foregroundColor: AppColors.primary,
+                textStyle: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 4),
+        Card(
+          child: Column(
+            children: [
+              _SettingsTile(
+                icon: Icons.book_outlined,
+                title: 'Study Plan',
+                subtitle: 'Focus: ${_capitalizeLevel(user?.studyFocus ?? 'Both')}',
+                onTap: () => context.go(_settingsPath()),
+              ),
+              const Divider(height: 1, indent: 56),
+              _SettingsTile(
+                icon: Icons.event_outlined,
+                title: 'Exam Date',
+                subtitle: user?.examDate ?? 'Not set',
+                onTap: () => context.go(_settingsPath()),
+              ),
+              const Divider(height: 1, indent: 56),
+              _SettingsTile(
+                icon: Icons.timer_outlined,
+                title: 'Daily Minutes',
+                subtitle: '${user?.dailyMinutes ?? 45} minutes',
+                onTap: () => context.go(_settingsPath()),
+              ),
+              const Divider(height: 1, indent: 56),
+              _SettingsTile(
+                icon: Icons.flag_outlined,
+                title: 'Target Score',
+                subtitle: '${user?.targetScore ?? 70}%',
+                onTap: () => context.go(_settingsPath()),
+              ),
+            ],
           ),
-          const Divider(height: 1, indent: 56),
-          _SettingsTile(
-            icon: Icons.event_outlined,
-            title: 'Exam Date',
-            subtitle: user?.examDate ?? 'Not set',
-            onTap: () => context.go('/profile/settings'),
-          ),
-          const Divider(height: 1, indent: 56),
-          _SettingsTile(
-            icon: Icons.timer_outlined,
-            title: 'Daily Minutes',
-            subtitle: '${user?.dailyMinutes ?? 45} minutes',
-            onTap: () => context.go('/profile/settings'),
-          ),
-          const Divider(height: 1, indent: 56),
-          _SettingsTile(
-            icon: Icons.flag_outlined,
-            title: 'Target Score',
-            subtitle: '${user?.targetScore ?? 70}%',
-            onTap: () => context.go('/profile/settings'),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -426,7 +464,7 @@ class _SettingsTile extends StatelessWidget {
       ),
       trailing: const Icon(
         Icons.chevron_right,
-        color: AppColors.textHint,
+        color: AppColors.primary,
       ),
       onTap: onTap,
     );

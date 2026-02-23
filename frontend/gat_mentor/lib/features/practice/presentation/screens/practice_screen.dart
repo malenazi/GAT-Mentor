@@ -329,6 +329,21 @@ class _PracticeScreenState extends ConsumerState<PracticeScreen>
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
+                // Blinking dot to show timer is running
+                if (!ps.isSubmitted)
+                  Container(
+                    width: 8,
+                    height: 8,
+                    margin: const EdgeInsets.only(right: 6),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: AppColors.error,
+                    ),
+                  )
+                      .animate(onPlay: (c) => c.repeat(reverse: true))
+                      .fadeIn(duration: 600.ms)
+                      .then()
+                      .fadeOut(duration: 600.ms),
                 Icon(
                   Icons.timer_outlined,
                   size: 18,

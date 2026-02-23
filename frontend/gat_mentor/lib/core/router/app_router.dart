@@ -18,7 +18,10 @@ import '../../features/exam_simulation/presentation/screens/simulation_screen.da
 import '../../features/exam_simulation/presentation/screens/simulation_result_screen.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
 import '../../features/profile/presentation/screens/plan_settings_screen.dart';
+import '../../features/admin/presentation/screens/admin_dashboard_screen.dart';
+import '../../features/admin/presentation/screens/admin_questions_screen.dart';
 import '../../shared/widgets/bottom_nav_bar.dart';
+import '../../shared/widgets/admin_nav_bar.dart';
 
 /// Converts a Riverpod [StateNotifierProvider] into a [Listenable] so GoRouter
 /// can use it as a [refreshListenable] without recreating the entire router.
@@ -51,18 +54,38 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       final authState = ref.read(authProvider);
       final isLoggedIn = authState.isAuthenticated;
       final isOnboarded = authState.user?.onboardingComplete ?? false;
+      final isAdmin = authState.user?.isAdmin ?? false;
       final path = state.matchedLocation;
       final isAuthRoute = path == '/login' || path == '/register';
       final isOnboardingRoute = path.startsWith('/onboarding');
+      final isAdminRoute = path.startsWith('/admin');
 
       // Still loading from storage — don't redirect yet.
       if (authState.isLoading) return null;
 
+      // Not logged in — force to login.
       if (!isLoggedIn && !isAuthRoute) return '/login';
-      if (isLoggedIn && !isOnboarded && !isOnboardingRoute) return '/onboarding';
-      if (isLoggedIn && isOnboarded && (isAuthRoute || isOnboardingRoute)) {
+
+      // Logged in but not onboarded (students only) — force onboarding.
+      if (isLoggedIn && !isAdmin && !isOnboarded && !isOnboardingRoute) {
+        return '/onboarding';
+      }
+
+      // Logged in + onboarded (or admin) trying to visit auth/onboarding pages.
+      if (isLoggedIn && (isOnboarded || isAdmin) && (isAuthRoute || isOnboardingRoute)) {
+        return isAdmin ? '/admin' : '/home';
+      }
+
+      // Admin user trying to access student routes — redirect to admin.
+      if (isLoggedIn && isAdmin && !isAdminRoute && !isAuthRoute && !isOnboardingRoute) {
+        return '/admin';
+      }
+
+      // Student trying to access admin routes — redirect to home.
+      if (isLoggedIn && !isAdmin && isAdminRoute) {
         return '/home';
       }
+
       return null;
     },
     routes: [
@@ -77,6 +100,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
           path: '/onboarding/result',
           builder: (_, __) => const DiagnosticResultScreen()),
+
+      // ── Student shell routes ──────────────────────────────────────
       ShellRoute(
         builder: (_, state, child) => ScaffoldWithNavBar(child: child),
         routes: [
@@ -114,6 +139,25 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               path: '/profile', builder: (_, __) => const ProfileScreen()),
           GoRoute(
               path: '/profile/settings',
+              builder: (_, __) => const PlanSettingsScreen()),
+        ],
+      ),
+
+      // ── Admin shell routes ────────────────────────────────────────
+      ShellRoute(
+        builder: (_, state, child) => AdminScaffoldWithNavBar(child: child),
+        routes: [
+          GoRoute(
+              path: '/admin',
+              builder: (_, __) => const AdminDashboardScreen()),
+          GoRoute(
+              path: '/admin/questions',
+              builder: (_, __) => const AdminQuestionsScreen()),
+          GoRoute(
+              path: '/admin/profile',
+              builder: (_, __) => const ProfileScreen()),
+          GoRoute(
+              path: '/admin/profile/settings',
               builder: (_, __) => const PlanSettingsScreen()),
         ],
       ),
