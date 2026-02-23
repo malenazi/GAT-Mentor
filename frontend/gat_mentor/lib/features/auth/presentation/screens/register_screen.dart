@@ -18,6 +18,13 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
+  bool _submitted = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _passwordController.addListener(() => setState(() {}));
+  }
 
   @override
   void dispose() {
@@ -28,6 +35,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   }
 
   Future<void> _handleRegister() async {
+    setState(() => _submitted = true);
     if (!_formKey.currentState!.validate()) return;
 
     ref.read(authProvider.notifier).clearError();
@@ -68,6 +76,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 28),
             child: Form(
               key: _formKey,
+              autovalidateMode: _submitted
+                  ? AutovalidateMode.onUserInteraction
+                  : AutovalidateMode.disabled,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -182,6 +193,13 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       return null;
                     },
                   ),
+                  // ---- Password Strength ------------------------------------
+                  if (_passwordController.text.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: _PasswordStrengthBar(
+                          password: _passwordController.text),
+                    ),
                   const SizedBox(height: 28),
 
                   // ---- Register Button ------------------------------------
@@ -248,5 +266,90 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         ),
       ),
     );
+  }
+}
+
+// ==========================================================================
+// Password Strength Bar
+// ==========================================================================
+
+class _PasswordStrengthBar extends StatelessWidget {
+  final String password;
+
+  const _PasswordStrengthBar({required this.password});
+
+  @override
+  Widget build(BuildContext context) {
+    final strength = _calculateStrength(password);
+    final label = _strengthLabel(strength);
+    final color = _strengthColor(strength);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: List.generate(4, (i) {
+            return Expanded(
+              child: Container(
+                height: 4,
+                margin: EdgeInsets.only(right: i < 3 ? 4 : 0),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(2),
+                  color: i < strength ? color : const Color(0xFFE2E8F0),
+                ),
+              ),
+            );
+          }),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          label,
+          style: TextStyle(fontSize: 12, color: color, fontWeight: FontWeight.w500),
+        ),
+      ],
+    );
+  }
+
+  int _calculateStrength(String pw) {
+    if (pw.isEmpty) return 0;
+    int score = 0;
+    if (pw.length >= 6) score++;
+    if (pw.length >= 8) score++;
+    if (RegExp(r'[A-Z]').hasMatch(pw) && RegExp(r'[a-z]').hasMatch(pw)) score++;
+    if (RegExp(r'[0-9]').hasMatch(pw) && RegExp(r'[^A-Za-z0-9]').hasMatch(pw)) score++;
+    return score;
+  }
+
+  String _strengthLabel(int strength) {
+    switch (strength) {
+      case 0:
+        return 'Too short';
+      case 1:
+        return 'Weak';
+      case 2:
+        return 'Fair';
+      case 3:
+        return 'Good';
+      case 4:
+        return 'Strong';
+      default:
+        return '';
+    }
+  }
+
+  Color _strengthColor(int strength) {
+    switch (strength) {
+      case 0:
+      case 1:
+        return AppColors.error;
+      case 2:
+        return AppColors.warning;
+      case 3:
+        return AppColors.info;
+      case 4:
+        return AppColors.success;
+      default:
+        return AppColors.textHint;
+    }
   }
 }
