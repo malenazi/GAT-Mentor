@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/l10n/app_localizations.dart';
 import '../providers/simulation_provider.dart';
 
 class SimulationScreen extends ConsumerStatefulWidget {
@@ -35,31 +36,35 @@ class _SimulationScreenState extends ConsumerState<SimulationScreen> {
   }
 
   Future<void> _confirmSubmit() async {
+    final s = S.of(context);
     final unanswered =
         ref.read(simulationProvider).totalQuestions -
             ref.read(simulationProvider).answers.length;
 
     final shouldSubmit = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Submit Exam?'),
-        content: Text(
-          unanswered > 0
-              ? 'You have $unanswered unanswered question${unanswered > 1 ? 's' : ''}. '
-                  'Are you sure you want to submit?'
-              : 'Are you sure you want to submit your exam?',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+      builder: (context) {
+        final s = S.of(context);
+        return AlertDialog(
+          title: Text(s.submitExam),
+          content: Text(
+            unanswered > 0
+                ? '${s.unansweredWarning(unanswered)}. '
+                    '${s.sureSubmit}'
+                : s.sureSubmitExam,
           ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Submit'),
-          ),
-        ],
-      ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: Text(s.cancel),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: Text(s.submit),
+            ),
+          ],
+        );
+      },
     );
 
     if (shouldSubmit == true) {
@@ -73,18 +78,19 @@ class _SimulationScreenState extends ConsumerState<SimulationScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final s = S.of(context);
     final state = ref.watch(simulationProvider);
 
     if (state.isLoading && state.questions.isEmpty) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Simulation')),
+        appBar: AppBar(title: Text(s.simulation)),
         body: const Center(child: CircularProgressIndicator()),
       );
     }
 
     if (state.error != null && state.questions.isEmpty) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Simulation')),
+        appBar: AppBar(title: Text(s.simulation)),
         body: Center(
           child: Padding(
             padding: const EdgeInsets.all(32),
@@ -98,7 +104,7 @@ class _SimulationScreenState extends ConsumerState<SimulationScreen> {
                 const SizedBox(height: 16),
                 ElevatedButton(
                   onPressed: () => context.go('/simulation'),
-                  child: const Text('Go Back'),
+                  child: Text(s.goBack),
                 ),
               ],
             ),
@@ -110,8 +116,8 @@ class _SimulationScreenState extends ConsumerState<SimulationScreen> {
     final question = state.currentQuestion;
     if (question == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Simulation')),
-        body: const Center(child: Text('No questions available.')),
+        appBar: AppBar(title: Text(s.simulation)),
+        body: Center(child: Text(s.noQuestionsAvailable)),
       );
     }
 
@@ -149,7 +155,7 @@ class _SimulationScreenState extends ConsumerState<SimulationScreen> {
                     children: [
                       // Question number
                       Text(
-                        'Question ${state.currentIndex + 1} of ${state.totalQuestions}',
+                        s.questionOf(state.currentIndex + 1, state.totalQuestions),
                         style: const TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
@@ -344,6 +350,7 @@ class _SimulationScreenState extends ConsumerState<SimulationScreen> {
   // ---------------------------------------------------------------------------
 
   Widget _buildBottomBar(SimulationState state) {
+    final s = S.of(context);
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: const BoxDecoration(
@@ -360,7 +367,7 @@ class _SimulationScreenState extends ConsumerState<SimulationScreen> {
               onPressed: () =>
                   ref.read(simulationProvider.notifier).previousQuestion(),
               icon: const Icon(Icons.arrow_back, size: 18),
-              label: const Text('Prev'),
+              label: Text(s.prev),
             )
           else
             const SizedBox(width: 100),
@@ -379,7 +386,7 @@ class _SimulationScreenState extends ConsumerState<SimulationScreen> {
                           strokeWidth: 2, color: Colors.white),
                     )
                   : const Icon(Icons.check_circle_outline, size: 18),
-              label: Text(state.isLoading ? 'Submitting...' : 'Submit All'),
+              label: Text(state.isLoading ? s.submitting : s.submitAll),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.success,
               ),
@@ -389,7 +396,7 @@ class _SimulationScreenState extends ConsumerState<SimulationScreen> {
               onPressed: () =>
                   ref.read(simulationProvider.notifier).nextQuestion(),
               icon: const Icon(Icons.arrow_forward, size: 18),
-              label: const Text('Next'),
+              label: Text(s.next),
             ),
         ],
       ),
@@ -403,24 +410,25 @@ class _SimulationScreenState extends ConsumerState<SimulationScreen> {
   Future<void> _showExitDialog() async {
     final shouldExit = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Leave Simulation?'),
-        content: const Text(
-          'Your progress will be lost if you leave now.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Stay'),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.error),
-            child: const Text('Leave'),
-          ),
-        ],
-      ),
+      builder: (context) {
+        final s = S.of(context);
+        return AlertDialog(
+          title: Text(s.leaveSimulation),
+          content: Text(s.simulationLeaveWarning),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: Text(s.stay),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context, true),
+              style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.error),
+              child: Text(s.leave),
+            ),
+          ],
+        );
+      },
     );
 
     if (shouldExit == true && mounted) {

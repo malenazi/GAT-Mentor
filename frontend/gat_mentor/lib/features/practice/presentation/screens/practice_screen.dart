@@ -5,6 +5,7 @@ import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/l10n/app_localizations.dart';
 import '../providers/practice_provider.dart';
 import '../widgets/option_tile.dart';
 
@@ -51,20 +52,20 @@ class _PracticeScreenState extends ConsumerState<PracticeScreen>
     return '${m.toString().padLeft(2, '0')}:${s.toString().padLeft(2, '0')}';
   }
 
-  String _difficultyLabel(int d) {
+  String _difficultyLabel(int d, S s) {
     switch (d) {
       case 1:
-        return 'Very Easy';
+        return s.veryEasy;
       case 2:
-        return 'Easy';
+        return s.easy;
       case 3:
-        return 'Medium';
+        return s.medium;
       case 4:
-        return 'Hard';
+        return s.hard;
       case 5:
-        return 'Very Hard';
+        return s.veryHard;
       default:
-        return 'Medium';
+        return s.medium;
     }
   }
 
@@ -92,24 +93,25 @@ class _PracticeScreenState extends ConsumerState<PracticeScreen>
   @override
   Widget build(BuildContext context) {
     final ps = ref.watch(practiceProvider);
+    final s = S.of(context);
 
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
         child: ps.isLoading && ps.question == null
-            ? _buildLoadingState()
+            ? _buildLoadingState(s)
             : ps.error != null && ps.question == null
-                ? _buildErrorState(ps.error!)
+                ? _buildErrorState(ps.error!, s)
                 : ps.question == null
-                    ? _buildEmptyState()
-                    : _buildQuestionView(ps),
+                    ? _buildEmptyState(s)
+                    : _buildQuestionView(ps, s),
       ),
     );
   }
 
   // ---- Loading / Error / Empty states -------------------------------------
 
-  Widget _buildLoadingState() {
+  Widget _buildLoadingState(S s) {
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -124,7 +126,7 @@ class _PracticeScreenState extends ConsumerState<PracticeScreen>
           ),
           const Gap(20),
           Text(
-            'Finding your next question...',
+            s.findingQuestion,
             style: TextStyle(
               fontSize: 16,
               color: AppColors.textSecondary,
@@ -138,7 +140,7 @@ class _PracticeScreenState extends ConsumerState<PracticeScreen>
     );
   }
 
-  Widget _buildErrorState(String message) {
+  Widget _buildErrorState(String message, S s) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -162,7 +164,7 @@ class _PracticeScreenState extends ConsumerState<PracticeScreen>
               onPressed: () =>
                   ref.read(practiceProvider.notifier).loadNextQuestion(),
               icon: const Icon(Icons.refresh_rounded, size: 20),
-              label: const Text('Try Again'),
+              label: Text(s.tryAgain),
             ),
           ],
         ),
@@ -170,7 +172,7 @@ class _PracticeScreenState extends ConsumerState<PracticeScreen>
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(S s) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -180,19 +182,19 @@ class _PracticeScreenState extends ConsumerState<PracticeScreen>
             Icon(Icons.school_rounded,
                 size: 64, color: AppColors.primary.withOpacity(0.5)),
             const Gap(16),
-            const Text(
-              'Ready to practice!',
-              style: TextStyle(
+            Text(
+              s.readyToPractice,
+              style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
                 color: AppColors.textPrimary,
               ),
             ),
             const Gap(8),
-            const Text(
-              'Tap the button below to get your first question.',
+            Text(
+              s.tapToStart,
               textAlign: TextAlign.center,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 15,
                 color: AppColors.textSecondary,
                 height: 1.5,
@@ -203,7 +205,7 @@ class _PracticeScreenState extends ConsumerState<PracticeScreen>
               onPressed: () =>
                   ref.read(practiceProvider.notifier).loadNextQuestion(),
               icon: const Icon(Icons.play_arrow_rounded),
-              label: const Text('Start Practice'),
+              label: Text(s.startPractice),
             ),
           ],
         ),
@@ -213,14 +215,14 @@ class _PracticeScreenState extends ConsumerState<PracticeScreen>
 
   // ---- Main question view -------------------------------------------------
 
-  Widget _buildQuestionView(PracticeState ps) {
+  Widget _buildQuestionView(PracticeState ps, S s) {
     final q = ps.question!;
     const options = ['A', 'B', 'C', 'D'];
 
     return Column(
       children: [
         // --- Top bar -------------------------------------------------------
-        _buildTopBar(ps),
+        _buildTopBar(ps, s),
 
         // --- Scrollable content --------------------------------------------
         Expanded(
@@ -279,13 +281,13 @@ class _PracticeScreenState extends ConsumerState<PracticeScreen>
                 // Hint card (if revealed)
                 if (ps.hintRevealed && ps.hintText != null) ...[
                   const Gap(16),
-                  _buildHintCard(ps.hintText!),
+                  _buildHintCard(ps.hintText!, s),
                 ],
 
                 // Post-submit feedback
                 if (ps.showingFeedback) ...[
                   const Gap(20),
-                  _buildFeedbackSection(ps),
+                  _buildFeedbackSection(ps, s),
                 ],
               ],
             ),
@@ -293,14 +295,14 @@ class _PracticeScreenState extends ConsumerState<PracticeScreen>
         ),
 
         // --- Bottom action bar ---------------------------------------------
-        _buildBottomBar(ps),
+        _buildBottomBar(ps, s),
       ],
     );
   }
 
   // ---- Top bar ------------------------------------------------------------
 
-  Widget _buildTopBar(PracticeState ps) {
+  Widget _buildTopBar(PracticeState ps, S s) {
     final q = ps.question!;
 
     return Container(
@@ -369,21 +371,21 @@ class _PracticeScreenState extends ConsumerState<PracticeScreen>
           const Spacer(),
 
           // Difficulty stars
-          _buildDifficultyStars(q.difficulty),
+          _buildDifficultyStars(q.difficulty, s),
         ],
       ),
     );
   }
 
-  Widget _buildDifficultyStars(int difficulty) {
+  Widget _buildDifficultyStars(int difficulty, S s) {
     final color = _difficultyColor(difficulty);
     return Tooltip(
-      message: _difficultyLabel(difficulty),
+      message: _difficultyLabel(difficulty, s),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            _difficultyLabel(difficulty),
+            _difficultyLabel(difficulty, s),
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
@@ -482,7 +484,7 @@ class _PracticeScreenState extends ConsumerState<PracticeScreen>
 
   // ---- Hint card ----------------------------------------------------------
 
-  Widget _buildHintCard(String hint) {
+  Widget _buildHintCard(String hint, S s) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
@@ -501,9 +503,9 @@ class _PracticeScreenState extends ConsumerState<PracticeScreen>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Hint',
-                  style: TextStyle(
+                Text(
+                  s.hint,
+                  style: const TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
                     color: AppColors.textSecondary,
@@ -531,7 +533,7 @@ class _PracticeScreenState extends ConsumerState<PracticeScreen>
 
   // ---- Post-submit feedback section ---------------------------------------
 
-  Widget _buildFeedbackSection(PracticeState ps) {
+  Widget _buildFeedbackSection(PracticeState ps, S s) {
     final result = ps.attemptResult!;
     final isCorrect = result.isCorrect;
 
@@ -566,7 +568,7 @@ class _PracticeScreenState extends ConsumerState<PracticeScreen>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      isCorrect ? 'Correct!' : 'Not quite right',
+                      isCorrect ? s.correct : s.notQuiteRight,
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w700,
@@ -578,8 +580,8 @@ class _PracticeScreenState extends ConsumerState<PracticeScreen>
                     const SizedBox(height: 2),
                     Text(
                       isCorrect
-                          ? 'Great job! The answer is ${result.correctOption.toUpperCase()}.'
-                          : 'The correct answer is ${result.correctOption.toUpperCase()}.',
+                          ? '${s.greatJobAnswer}${result.correctOption.toUpperCase()}.'
+                          : '${s.correctAnswerIs}${result.correctOption.toUpperCase()}.',
                       style: TextStyle(
                         fontSize: 14,
                         color: isCorrect
@@ -606,12 +608,12 @@ class _PracticeScreenState extends ConsumerState<PracticeScreen>
         const Gap(14),
 
         // Mastery change indicator
-        _buildMasteryChange(result.masteryChange, result.newMastery),
+        _buildMasteryChange(result.masteryChange, result.newMastery, s),
 
         // "Why wrong" explanation (only for wrong answers)
         if (!isCorrect && result.whyWrong != null) ...[
           const Gap(14),
-          _buildWhyWrongCard(result.whyWrong!, result.selectedOption),
+          _buildWhyWrongCard(result.whyWrong!, result.selectedOption, s),
         ],
 
         const Gap(14),
@@ -624,7 +626,7 @@ class _PracticeScreenState extends ConsumerState<PracticeScreen>
                 onPressed: () => context.push(
                     '/practice/solution/${ps.question!.id}'),
                 icon: const Icon(Icons.menu_book_rounded, size: 18),
-                label: const Text('View Solution'),
+                label: Text(s.viewSolution),
               ),
             ),
             const SizedBox(width: 12),
@@ -633,7 +635,7 @@ class _PracticeScreenState extends ConsumerState<PracticeScreen>
                 onPressed: () =>
                     ref.read(practiceProvider.notifier).resetForNext(),
                 icon: const Icon(Icons.arrow_forward_rounded, size: 18),
-                label: const Text('Next Question'),
+                label: Text(s.nextQuestion),
               ),
             ),
           ],
@@ -651,7 +653,7 @@ class _PracticeScreenState extends ConsumerState<PracticeScreen>
     );
   }
 
-  Widget _buildMasteryChange(double change, double newMastery) {
+  Widget _buildMasteryChange(double change, double newMastery, S s) {
     final isPositive = change >= 0;
     final color = isPositive ? AppColors.correct : AppColors.wrong;
     final sign = isPositive ? '+' : '';
@@ -675,7 +677,7 @@ class _PracticeScreenState extends ConsumerState<PracticeScreen>
           ),
           const SizedBox(width: 10),
           Text(
-            'Mastery: $sign${(change * 100).toStringAsFixed(1)}%',
+            '${s.mastery}$sign${(change * 100).toStringAsFixed(1)}%',
             style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w700,
@@ -712,7 +714,7 @@ class _PracticeScreenState extends ConsumerState<PracticeScreen>
         );
   }
 
-  Widget _buildWhyWrongCard(String whyWrong, String selectedOption) {
+  Widget _buildWhyWrongCard(String whyWrong, String selectedOption, S s) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
@@ -734,7 +736,7 @@ class _PracticeScreenState extends ConsumerState<PracticeScreen>
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
-                  'Why $selectedOption is wrong',
+                  '${s.why}$selectedOption${s.isWrong}',
                   style: const TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
@@ -769,7 +771,7 @@ class _PracticeScreenState extends ConsumerState<PracticeScreen>
 
   // ---- Bottom bar ---------------------------------------------------------
 
-  Widget _buildBottomBar(PracticeState ps) {
+  Widget _buildBottomBar(PracticeState ps, S s) {
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
       decoration: BoxDecoration(
@@ -791,11 +793,11 @@ class _PracticeScreenState extends ConsumerState<PracticeScreen>
                 const SizedBox(width: 10),
 
                 // "I Guessed" toggle
-                _buildGuessedToggle(ps),
+                _buildGuessedToggle(ps, s),
                 const SizedBox(width: 12),
 
                 // Submit button
-                Expanded(child: _buildSubmitButton(ps)),
+                Expanded(child: _buildSubmitButton(ps, s)),
               ],
             ),
     );
@@ -827,7 +829,7 @@ class _PracticeScreenState extends ConsumerState<PracticeScreen>
     );
   }
 
-  Widget _buildGuessedToggle(PracticeState ps) {
+  Widget _buildGuessedToggle(PracticeState ps, S s) {
     return GestureDetector(
       onTap: () => ref.read(practiceProvider.notifier).toggleGuessed(),
       child: AnimatedContainer(
@@ -859,7 +861,7 @@ class _PracticeScreenState extends ConsumerState<PracticeScreen>
             ),
             const SizedBox(width: 6),
             Text(
-              'Guess',
+              s.guess,
               style: TextStyle(
                 fontSize: 13,
                 fontWeight:
@@ -875,7 +877,7 @@ class _PracticeScreenState extends ConsumerState<PracticeScreen>
     );
   }
 
-  Widget _buildSubmitButton(PracticeState ps) {
+  Widget _buildSubmitButton(PracticeState ps, S s) {
     final canSubmit = ps.canSubmit;
 
     return AnimatedContainer(
@@ -914,9 +916,9 @@ class _PracticeScreenState extends ConsumerState<PracticeScreen>
                 children: [
                   const Icon(Icons.check_rounded, size: 20),
                   const SizedBox(width: 8),
-                  const Text(
-                    'Submit Answer',
-                    style: TextStyle(
+                  Text(
+                    s.submitAnswer,
+                    style: const TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w700,
                     ),

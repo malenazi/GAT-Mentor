@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/l10n/app_localizations.dart';
 import '../../../../shared/widgets/error_display.dart';
 import '../../../../shared/widgets/loading_widget.dart';
 import '../providers/admin_provider.dart';
@@ -24,24 +25,22 @@ class _AdminQuestionsScreenState extends ConsumerState<AdminQuestionsScreen> {
   }
 
   Future<void> _confirmDeactivate(int questionId) async {
+    final s = S.of(context);
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Deactivate Question'),
-        content: const Text(
-          'This will hide the question from students. '
-          'Are you sure?',
-        ),
+        title: Text(s.deactivateQuestion),
+        content: Text(s.deactivateWarning),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
+            child: Text(s.cancel),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, true),
             style:
                 ElevatedButton.styleFrom(backgroundColor: AppColors.error),
-            child: const Text('Deactivate'),
+            child: Text(s.deactivate),
           ),
         ],
       ),
@@ -77,12 +76,13 @@ class _AdminQuestionsScreenState extends ConsumerState<AdminQuestionsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final s = S.of(context);
     final state = ref.watch(adminQuestionsProvider);
 
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('Question Bank'),
+        title: Text(s.questionManagement),
         backgroundColor: AppColors.surface,
         elevation: 0,
         actions: [
@@ -102,7 +102,7 @@ class _AdminQuestionsScreenState extends ConsumerState<AdminQuestionsScreen> {
         ],
       ),
       body: state.isLoading && state.questions.isEmpty
-          ? const LoadingWidget(message: 'Loading questions...')
+          ? LoadingWidget(message: s.loadingQuestions)
           : state.error != null && state.questions.isEmpty
               ? ErrorDisplay(
                   message: state.error!,
@@ -224,6 +224,7 @@ class _QuestionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final s = S.of(context);
     final text = question['text'] as String? ?? 'No text';
     final isActive = question['is_active'] as bool? ?? true;
     final correctOption =
@@ -341,7 +342,7 @@ class _QuestionCard extends StatelessWidget {
               child: TextButton.icon(
                 onPressed: onDeactivate,
                 icon: const Icon(Icons.visibility_off_outlined, size: 16),
-                label: const Text('Deactivate'),
+                label: Text(s.deactivate),
                 style: TextButton.styleFrom(
                   foregroundColor: AppColors.error,
                   textStyle: const TextStyle(fontSize: 13),

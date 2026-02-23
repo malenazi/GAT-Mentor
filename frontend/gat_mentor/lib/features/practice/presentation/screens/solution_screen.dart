@@ -6,6 +6,7 @@ import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/l10n/app_localizations.dart';
 import '../../data/models/question_model.dart';
 import '../../data/question_repository.dart';
 
@@ -32,13 +33,14 @@ class SolutionScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final detailAsync = ref.watch(questionDetailProvider(questionId));
+    final s = S.of(context);
 
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text(
-          'Solution',
-          style: TextStyle(fontWeight: FontWeight.w700),
+        title: Text(
+          s.solution,
+          style: const TextStyle(fontWeight: FontWeight.w700),
         ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded),
@@ -49,15 +51,15 @@ class SolutionScreen extends ConsumerWidget {
         loading: () => const Center(
           child: CircularProgressIndicator(color: AppColors.primary),
         ),
-        error: (error, _) => _buildError(context, ref, error.toString()),
-        data: (detail) => _buildSolution(context, detail),
+        error: (error, _) => _buildError(context, ref, error.toString(), s),
+        data: (detail) => _buildSolution(context, detail, s),
       ),
     );
   }
 
   // ---- Error state --------------------------------------------------------
 
-  Widget _buildError(BuildContext context, WidgetRef ref, String message) {
+  Widget _buildError(BuildContext context, WidgetRef ref, String message, S s) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -80,7 +82,7 @@ class SolutionScreen extends ConsumerWidget {
             ElevatedButton.icon(
               onPressed: () => ref.invalidate(questionDetailProvider(questionId)),
               icon: const Icon(Icons.refresh_rounded, size: 18),
-              label: const Text('Retry'),
+              label: Text(s.retry),
             ),
           ],
         ),
@@ -90,7 +92,7 @@ class SolutionScreen extends ConsumerWidget {
 
   // ---- Solution content ---------------------------------------------------
 
-  Widget _buildSolution(BuildContext context, QuestionDetail detail) {
+  Widget _buildSolution(BuildContext context, QuestionDetail detail, S s) {
     const options = ['A', 'B', 'C', 'D'];
 
     return SingleChildScrollView(
@@ -100,7 +102,7 @@ class SolutionScreen extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Question text
-          _sectionLabel('Question'),
+          _sectionLabel(s.question),
           const Gap(8),
           Container(
             width: double.infinity,
@@ -126,7 +128,7 @@ class SolutionScreen extends ConsumerWidget {
           const Gap(20),
 
           // Options with correct answer highlighted
-          _sectionLabel('Answer'),
+          _sectionLabel(s.answer),
           const Gap(8),
           ...options.map((letter) {
             final isCorrect = letter == detail.correctOption;
@@ -196,7 +198,7 @@ class SolutionScreen extends ConsumerWidget {
           const Gap(24),
 
           // Step-by-step explanation (Markdown)
-          _sectionLabel('Step-by-Step Solution'),
+          _sectionLabel(s.stepByStepSolution),
           const Gap(8),
           Container(
             width: double.infinity,
@@ -270,9 +272,9 @@ class SolutionScreen extends ConsumerWidget {
             child: ElevatedButton.icon(
               onPressed: () => context.pop(),
               icon: const Icon(Icons.arrow_back_rounded, size: 20),
-              label: const Text(
-                'Back to Practice',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+              label: Text(
+                s.backToPractice,
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
               ),
             ),
           ),

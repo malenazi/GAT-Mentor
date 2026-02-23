@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/l10n/app_localizations.dart';
+import '../../../../core/l10n/locale_provider.dart';
 import '../providers/auth_provider.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
@@ -51,6 +53,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
+    final s = S.of(context);
 
     // Listen for errors to show SnackBar feedback.
     ref.listen<AuthState>(authProvider, (prev, next) {
@@ -83,8 +86,22 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  // ---- Language Toggle ----------------------------------------
+                  Align(
+                    alignment: AlignmentDirectional.centerEnd,
+                    child: TextButton.icon(
+                      onPressed: () =>
+                          ref.read(localeProvider.notifier).toggleLocale(),
+                      icon: const Icon(Icons.language, size: 18),
+                      label: Text(s.switchLanguage),
+                      style: TextButton.styleFrom(
+                        foregroundColor: AppColors.primary,
+                      ),
+                    ),
+                  ),
+
                   // ---- Branding -------------------------------------------
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 8),
                   Container(
                     width: 72,
                     height: 72,
@@ -100,7 +117,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   ),
                   const SizedBox(height: 24),
                   Text(
-                    'Create Account',
+                    s.createAccount,
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                           fontWeight: FontWeight.bold,
@@ -109,7 +126,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Start your personalized GAT prep journey',
+                    s.registerSubtitle,
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: AppColors.textSecondary,
@@ -123,17 +140,17 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     keyboardType: TextInputType.name,
                     textInputAction: TextInputAction.next,
                     textCapitalization: TextCapitalization.words,
-                    decoration: const InputDecoration(
-                      labelText: 'Full Name',
-                      hintText: 'Ahmed Khan',
-                      prefixIcon: Icon(Icons.person_outlined),
+                    decoration: InputDecoration(
+                      labelText: s.fullName,
+                      hintText: s.fullNameHint,
+                      prefixIcon: const Icon(Icons.person_outlined),
                     ),
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
-                        return 'Please enter your full name';
+                        return s.pleaseEnterName;
                       }
                       if (value.trim().length < 2) {
-                        return 'Name must be at least 2 characters';
+                        return s.nameMinLength;
                       }
                       return null;
                     },
@@ -145,18 +162,18 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
                     textInputAction: TextInputAction.next,
-                    decoration: const InputDecoration(
-                      labelText: 'Email',
-                      hintText: 'you@example.com',
-                      prefixIcon: Icon(Icons.email_outlined),
+                    decoration: InputDecoration(
+                      labelText: s.email,
+                      hintText: s.emailHint,
+                      prefixIcon: const Icon(Icons.email_outlined),
                     ),
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
-                        return 'Please enter your email';
+                        return s.pleaseEnterEmail;
                       }
                       if (!RegExp(r'^[\w\.\-]+@[\w\.\-]+\.\w{2,}$')
                           .hasMatch(value.trim())) {
-                        return 'Please enter a valid email';
+                        return s.pleaseEnterValidEmail;
                       }
                       return null;
                     },
@@ -170,8 +187,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     textInputAction: TextInputAction.done,
                     onFieldSubmitted: (_) => _handleRegister(),
                     decoration: InputDecoration(
-                      labelText: 'Password',
-                      hintText: 'At least 6 characters',
+                      labelText: s.password,
+                      hintText: s.passwordHint,
                       prefixIcon: const Icon(Icons.lock_outlined),
                       suffixIcon: IconButton(
                         icon: Icon(
@@ -185,21 +202,31 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Please enter a password';
+                        return s.pleaseEnterAPassword;
                       }
                       if (value.length < 6) {
-                        return 'Password must be at least 6 characters';
+                        return s.passwordMinLength;
                       }
                       return null;
                     },
                   ),
-                  // ---- Password Strength ------------------------------------
+                  // ---- Password Strength & Requirements ----------------------
                   if (_passwordController.text.isNotEmpty)
                     Padding(
                       padding: const EdgeInsets.only(top: 8),
                       child: _PasswordStrengthBar(
                           password: _passwordController.text),
                     ),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 6),
+                    child: Text(
+                      s.passwordRequirements,
+                      style: const TextStyle(
+                        fontSize: 11,
+                        color: AppColors.textHint,
+                      ),
+                    ),
+                  ),
                   const SizedBox(height: 28),
 
                   // ---- Register Button ------------------------------------
@@ -227,9 +254,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                 color: Colors.white,
                               ),
                             )
-                          : const Text(
-                              'Create Account',
-                              style: TextStyle(
+                          : Text(
+                              s.createAccount,
+                              style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -243,14 +270,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        'Already have an account? ',
+                        s.alreadyHaveAccount,
                         style: TextStyle(color: AppColors.textSecondary),
                       ),
                       GestureDetector(
                         onTap: () => context.go('/login'),
-                        child: const Text(
-                          'Login',
-                          style: TextStyle(
+                        child: Text(
+                          s.login,
+                          style: const TextStyle(
                             color: AppColors.primary,
                             fontWeight: FontWeight.w600,
                           ),
@@ -280,8 +307,9 @@ class _PasswordStrengthBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final s = S.of(context);
     final strength = _calculateStrength(password);
-    final label = _strengthLabel(strength);
+    final label = _strengthLabel(strength, s);
     final color = _strengthColor(strength);
 
     return Column(
@@ -304,7 +332,8 @@ class _PasswordStrengthBar extends StatelessWidget {
         const SizedBox(height: 6),
         Text(
           label,
-          style: TextStyle(fontSize: 12, color: color, fontWeight: FontWeight.w500),
+          style: TextStyle(
+              fontSize: 12, color: color, fontWeight: FontWeight.w500),
         ),
       ],
     );
@@ -315,23 +344,28 @@ class _PasswordStrengthBar extends StatelessWidget {
     int score = 0;
     if (pw.length >= 6) score++;
     if (pw.length >= 8) score++;
-    if (RegExp(r'[A-Z]').hasMatch(pw) && RegExp(r'[a-z]').hasMatch(pw)) score++;
-    if (RegExp(r'[0-9]').hasMatch(pw) && RegExp(r'[^A-Za-z0-9]').hasMatch(pw)) score++;
+    if (RegExp(r'[A-Z]').hasMatch(pw) && RegExp(r'[a-z]').hasMatch(pw)) {
+      score++;
+    }
+    if (RegExp(r'[0-9]').hasMatch(pw) &&
+        RegExp(r'[^A-Za-z0-9]').hasMatch(pw)) {
+      score++;
+    }
     return score;
   }
 
-  String _strengthLabel(int strength) {
+  String _strengthLabel(int strength, S s) {
     switch (strength) {
       case 0:
-        return 'Too short';
+        return s.tooShort;
       case 1:
-        return 'Weak';
+        return s.weak;
       case 2:
-        return 'Fair';
+        return s.fair;
       case 3:
-        return 'Good';
+        return s.good;
       case 4:
-        return 'Strong';
+        return s.strong;
       default:
         return '';
     }

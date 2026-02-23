@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/l10n/app_localizations.dart';
 import '../../data/session_repository.dart';
 import '../providers/simulation_provider.dart';
 
@@ -83,6 +84,7 @@ class _SimulationResultScreenState
 
   @override
   Widget build(BuildContext context) {
+    final s = S.of(context);
     return Scaffold(
       body: SafeArea(
         child: _isLoading
@@ -99,6 +101,7 @@ class _SimulationResultScreenState
   // ---------------------------------------------------------------------------
 
   Widget _buildError() {
+    final s = S.of(context);
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -111,7 +114,7 @@ class _SimulationResultScreenState
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () => context.go('/home'),
-              child: const Text('Go Home'),
+              child: Text(s.goHome),
             ),
           ],
         ),
@@ -124,6 +127,7 @@ class _SimulationResultScreenState
   // ---------------------------------------------------------------------------
 
   Widget _buildResult() {
+    final s = S.of(context);
     final result = _result!;
     final totalQuestions =
         (result['total_questions'] ?? result['question_count'] ?? 0) as int;
@@ -161,7 +165,7 @@ class _SimulationResultScreenState
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  isGoodScore ? 'Great Job!' : 'Keep Practicing!',
+                  isGoodScore ? s.greatJob : s.keepPracticing,
                   style: const TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.w700,
@@ -171,8 +175,8 @@ class _SimulationResultScreenState
                 const SizedBox(height: 4),
                 Text(
                   isGoodScore
-                      ? 'You did well on this simulation!'
-                      : 'Every attempt makes you stronger.',
+                      ? s.didWellSimulation
+                      : s.everyAttemptStronger,
                   style: const TextStyle(
                     fontSize: 14,
                     color: AppColors.textSecondary,
@@ -208,9 +212,9 @@ class _SimulationResultScreenState
                     color: AppColors.textPrimary,
                   ),
                 ),
-                const Text(
-                  'Correct',
-                  style: TextStyle(
+                Text(
+                  s.correctLabel,
+                  style: const TextStyle(
                     fontSize: 13,
                     color: AppColors.textSecondary,
                   ),
@@ -227,7 +231,7 @@ class _SimulationResultScreenState
               Expanded(
                 child: _StatBox(
                   icon: Icons.percent,
-                  label: 'Accuracy',
+                  label: s.accuracy,
                   value: '${accuracy.toStringAsFixed(1)}%',
                   color: AppColors.primary,
                 ),
@@ -236,7 +240,7 @@ class _SimulationResultScreenState
               Expanded(
                 child: _StatBox(
                   icon: Icons.timer_outlined,
-                  label: 'Time Taken',
+                  label: s.timeTaken,
                   value: _formatDuration(timeTakenSeconds),
                   color: AppColors.warning,
                 ),
@@ -258,7 +262,7 @@ class _SimulationResultScreenState
             child: ElevatedButton.icon(
               onPressed: () => context.go('/review'),
               icon: const Icon(Icons.rate_review_outlined),
-              label: const Text('Review Mistakes'),
+              label: Text(s.reviewMistakes),
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 16),
               ),
@@ -273,7 +277,7 @@ class _SimulationResultScreenState
                 context.go('/home');
               },
               icon: const Icon(Icons.home_outlined),
-              label: const Text('Home'),
+              label: Text(s.home),
               style: OutlinedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 16),
               ),
@@ -290,20 +294,21 @@ class _SimulationResultScreenState
   // ---------------------------------------------------------------------------
 
   Widget _buildTopicBreakdown(List<dynamic> breakdown) {
+    final s = S.of(context);
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Row(
+            Row(
               children: [
-                Icon(Icons.bar_chart_outlined,
+                const Icon(Icons.bar_chart_outlined,
                     size: 20, color: AppColors.primary),
-                SizedBox(width: 8),
+                const SizedBox(width: 8),
                 Text(
-                  'Per-Topic Breakdown',
-                  style: TextStyle(
+                  s.perTopicBreakdown,
+                  style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
                     color: AppColors.textPrimary,

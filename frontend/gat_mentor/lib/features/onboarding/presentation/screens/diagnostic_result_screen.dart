@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/l10n/app_localizations.dart';
 import '../../../../shared/widgets/loading_widget.dart';
 import '../providers/onboarding_provider.dart';
 
@@ -10,12 +11,13 @@ class DiagnosticResultScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final s = S.of(context);
     final state = ref.watch(onboardingProvider);
     final textTheme = Theme.of(context).textTheme;
 
     if (state.isLoading || state.results == null) {
-      return const Scaffold(
-        body: LoadingWidget(message: 'Analyzing your results...'),
+      return Scaffold(
+        body: LoadingWidget(message: s.analyzingResults),
       );
     }
 
@@ -45,7 +47,7 @@ class DiagnosticResultScreen extends ConsumerWidget {
                     _AccuracyRing(accuracy: overallAccuracy),
                     const SizedBox(height: 24),
                     Text(
-                      'Diagnostic Complete!',
+                      s.diagnosticComplete,
                       style: textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: AppColors.textPrimary,
@@ -53,7 +55,7 @@ class DiagnosticResultScreen extends ConsumerWidget {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      _getEncouragingMessage(overallAccuracy),
+                      _getEncouragingMessage(overallAccuracy, s),
                       textAlign: TextAlign.center,
                       style: textTheme.bodyMedium?.copyWith(
                         color: AppColors.textSecondary,
@@ -102,16 +104,16 @@ class DiagnosticResultScreen extends ConsumerWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'Recommended Level',
-                              style: TextStyle(
+                            Text(
+                              s.recommendedLevel,
+                              style: const TextStyle(
                                 fontSize: 13,
                                 color: AppColors.textSecondary,
                               ),
                             ),
                             const SizedBox(height: 2),
                             Text(
-                              _formatLevel(recommendedLevel),
+                              _formatLevel(recommendedLevel, s),
                               style: const TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
@@ -133,7 +135,7 @@ class DiagnosticResultScreen extends ConsumerWidget {
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(24, 28, 24, 12),
                   child: Text(
-                    'Performance by Concept',
+                    s.performanceByConcept,
                     style: textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w700,
                       color: AppColors.textPrimary,
@@ -184,7 +186,7 @@ class DiagnosticResultScreen extends ConsumerWidget {
             child: ElevatedButton.icon(
               onPressed: () => context.go('/home'),
               icon: const Icon(Icons.rocket_launch_outlined),
-              label: const Text('Start Learning'),
+              label: Text(s.startLearning),
             ),
           ),
         ),
@@ -217,32 +219,29 @@ class DiagnosticResultScreen extends ConsumerWidget {
     return [];
   }
 
-  String _formatLevel(String level) {
+  String _formatLevel(String level, S s) {
     switch (level.toLowerCase()) {
       case 'beginner':
-        return 'Beginner';
+        return s.beginner;
       case 'average':
-        return 'Average';
+        return s.average;
       case 'high':
-        return 'High Scorer';
+        return s.highScorer;
       case 'high_scorer':
-        return 'High Scorer';
+        return s.highScorer;
       default:
         return level[0].toUpperCase() + level.substring(1);
     }
   }
 
-  String _getEncouragingMessage(double accuracy) {
+  String _getEncouragingMessage(double accuracy, S s) {
     if (accuracy >= 0.8) {
-      return 'Excellent performance! You have a strong foundation. '
-          'Let\'s push for mastery.';
+      return s.highScorerFeedback;
     }
     if (accuracy >= 0.5) {
-      return 'Good start! We\'ve identified areas to focus on. '
-          'Your personalized plan is ready.';
+      return s.averageFeedback;
     }
-    return 'Great job completing the diagnostic! We\'ll build your '
-        'skills step by step with a tailored study plan.';
+    return s.beginnerFeedback;
   }
 }
 
@@ -257,6 +256,7 @@ class _AccuracyRing extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final s = S.of(context);
     final percentage = (accuracy * 100).round();
     final color = AppColors.getMasteryColor(accuracy);
 
@@ -288,9 +288,9 @@ class _AccuracyRing extends StatelessWidget {
                   color: color,
                 ),
               ),
-              const Text(
-                'Accuracy',
-                style: TextStyle(
+              Text(
+                s.accuracy,
+                style: const TextStyle(
                   fontSize: 13,
                   color: AppColors.textSecondary,
                 ),

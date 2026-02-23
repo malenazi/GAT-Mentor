@@ -1,7 +1,12 @@
+import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import '../constants/api_constants.dart';
 import '../storage/secure_storage.dart';
+
+/// Broadcast stream that fires when the server returns 401.
+/// The app shell listens to this and shows a "session expired" dialog.
+final sessionExpiredController = StreamController<void>.broadcast();
 
 class ApiClient {
   late final Dio dio;
@@ -73,6 +78,8 @@ class AuthInterceptor extends QueuedInterceptor {
   void onError(DioException err, ErrorInterceptorHandler handler) {
     if (err.response?.statusCode == 401) {
       SecureStorage.deleteToken();
+      // Notify listeners so the UI can show "session expired" dialog.
+      sessionExpiredController.add(null);
     }
     handler.next(err);
   }

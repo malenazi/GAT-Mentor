@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/l10n/app_localizations.dart';
 import '../providers/profile_provider.dart';
 
 class PlanSettingsScreen extends ConsumerStatefulWidget {
@@ -111,11 +112,12 @@ class _PlanSettingsScreenState extends ConsumerState<PlanSettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final s = S.of(context);
     final state = ref.watch(profileProvider);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Study Plan Settings'),
+        title: Text(s.studyPlanSettings),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => context.pop(),
@@ -127,18 +129,18 @@ class _PlanSettingsScreenState extends ConsumerState<PlanSettingsScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Exam Date
-            const Text(
-              'Exam Date',
-              style: TextStyle(
+            Text(
+              s.examDate,
+              style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
                 color: AppColors.textPrimary,
               ),
             ),
             const SizedBox(height: 4),
-            const Text(
-              'When is your GAT exam?',
-              style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+            Text(
+              s.whenGatExam,
+              style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
             ),
             const SizedBox(height: 12),
             InkWell(
@@ -161,7 +163,7 @@ class _PlanSettingsScreenState extends ConsumerState<PlanSettingsScreen> {
                     Text(
                       _examDate != null
                           ? '${_examDate!.day}/${_examDate!.month}/${_examDate!.year}'
-                          : 'Select exam date',
+                          : s.selectExamDate,
                       style: TextStyle(
                         fontSize: 15,
                         color: _examDate != null
@@ -185,18 +187,18 @@ class _PlanSettingsScreenState extends ConsumerState<PlanSettingsScreen> {
             const SizedBox(height: 28),
 
             // Daily Minutes Slider
-            const Text(
-              'Daily Study Time',
-              style: TextStyle(
+            Text(
+              s.dailyStudyTime,
+              style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
                 color: AppColors.textPrimary,
               ),
             ),
             const SizedBox(height: 4),
-            const Text(
-              'How many minutes do you want to study each day?',
-              style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+            Text(
+              s.howManyMinutes,
+              style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
             ),
             const SizedBox(height: 12),
             Card(
@@ -253,18 +255,18 @@ class _PlanSettingsScreenState extends ConsumerState<PlanSettingsScreen> {
             const SizedBox(height: 28),
 
             // Target Score Slider
-            const Text(
-              'Target Score',
-              style: TextStyle(
+            Text(
+              s.targetScore,
+              style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
                 color: AppColors.textPrimary,
               ),
             ),
             const SizedBox(height: 4),
-            const Text(
-              'What score are you aiming for?',
-              style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+            Text(
+              s.whatScoreAiming,
+              style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
             ),
             const SizedBox(height: 12),
             Card(
@@ -321,18 +323,18 @@ class _PlanSettingsScreenState extends ConsumerState<PlanSettingsScreen> {
             const SizedBox(height: 28),
 
             // Level Selector
-            const Text(
-              'Current Level',
-              style: TextStyle(
+            Text(
+              s.currentLevel,
+              style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
                 color: AppColors.textPrimary,
               ),
             ),
             const SizedBox(height: 4),
-            const Text(
-              'How would you describe your current ability?',
-              style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+            Text(
+              s.howDescribeAbility,
+              style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
             ),
             const SizedBox(height: 12),
             Card(
@@ -384,7 +386,7 @@ class _PlanSettingsScreenState extends ConsumerState<PlanSettingsScreen> {
                         ),
                       )
                     : const Icon(Icons.save_outlined),
-                label: Text(state.isLoading ? 'Saving...' : 'Save Settings'),
+                label: Text(state.isLoading ? s.saving : s.saveSettings),
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
@@ -402,6 +404,7 @@ class _PlanSettingsScreenState extends ConsumerState<PlanSettingsScreen> {
   // ---------------------------------------------------------------------------
 
   Widget _buildDaysUntilExam() {
+    final s = S.of(context);
     final daysLeft = _examDate!.difference(DateTime.now()).inDays;
     final color = daysLeft < 14
         ? AppColors.error
@@ -422,8 +425,8 @@ class _PlanSettingsScreenState extends ConsumerState<PlanSettingsScreen> {
           const SizedBox(width: 6),
           Text(
             daysLeft > 0
-                ? '$daysLeft days until your exam'
-                : 'Exam date has passed',
+                ? s.daysUntilExam(daysLeft)
+                : s.examDatePassed,
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w500,

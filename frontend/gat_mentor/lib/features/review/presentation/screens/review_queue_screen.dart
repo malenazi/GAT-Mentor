@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/l10n/app_localizations.dart';
 import '../../data/review_repository.dart';
 import '../providers/review_provider.dart';
 
@@ -30,6 +31,7 @@ class _ReviewQueueScreenState extends ConsumerState<ReviewQueueScreen> {
   @override
   Widget build(BuildContext context) {
     final rs = ref.watch(reviewProvider);
+    final s = S.of(context);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -37,9 +39,9 @@ class _ReviewQueueScreenState extends ConsumerState<ReviewQueueScreen> {
         title: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
-              'Review Queue',
-              style: TextStyle(fontWeight: FontWeight.w700),
+            Text(
+              s.reviewQueue,
+              style: const TextStyle(fontWeight: FontWeight.w700),
             ),
             if (rs.count > 0) ...[
               const SizedBox(width: 8),
@@ -66,17 +68,17 @@ class _ReviewQueueScreenState extends ConsumerState<ReviewQueueScreen> {
           IconButton(
             icon: const Icon(Icons.refresh_rounded),
             onPressed: () => ref.read(reviewProvider.notifier).loadQueue(),
-            tooltip: 'Refresh',
+            tooltip: s.refresh,
           ),
         ],
       ),
       body: rs.isLoading && rs.items.isEmpty
           ? _buildLoading()
           : rs.error != null && rs.items.isEmpty
-              ? _buildError(rs.error!)
+              ? _buildError(rs.error!, s)
               : rs.isEmpty
-                  ? _buildEmpty()
-                  : _buildList(rs),
+                  ? _buildEmpty(s)
+                  : _buildList(rs, s),
     );
   }
 
@@ -90,7 +92,7 @@ class _ReviewQueueScreenState extends ConsumerState<ReviewQueueScreen> {
 
   // ---- Error state --------------------------------------------------------
 
-  Widget _buildError(String message) {
+  Widget _buildError(String message, S s) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -113,7 +115,7 @@ class _ReviewQueueScreenState extends ConsumerState<ReviewQueueScreen> {
             ElevatedButton.icon(
               onPressed: () => ref.read(reviewProvider.notifier).loadQueue(),
               icon: const Icon(Icons.refresh_rounded, size: 18),
-              label: const Text('Try Again'),
+              label: Text(s.tryAgain),
             ),
           ],
         ),
@@ -123,7 +125,7 @@ class _ReviewQueueScreenState extends ConsumerState<ReviewQueueScreen> {
 
   // ---- Empty state --------------------------------------------------------
 
-  Widget _buildEmpty() {
+  Widget _buildEmpty(S s) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(40),
@@ -144,19 +146,19 @@ class _ReviewQueueScreenState extends ConsumerState<ReviewQueueScreen> {
               ),
             ),
             const Gap(20),
-            const Text(
-              'No reviews due!',
-              style: TextStyle(
+            Text(
+              s.noReviewsDue,
+              style: const TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.w700,
                 color: AppColors.textPrimary,
               ),
             ),
             const Gap(8),
-            const Text(
-              'Keep practicing and any mistakes\nwill show up here for review.',
+            Text(
+              s.keepPracticingReview,
               textAlign: TextAlign.center,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 15,
                 color: AppColors.textSecondary,
                 height: 1.5,
@@ -178,7 +180,7 @@ class _ReviewQueueScreenState extends ConsumerState<ReviewQueueScreen> {
 
   // ---- Review item list ---------------------------------------------------
 
-  Widget _buildList(ReviewState rs) {
+  Widget _buildList(ReviewState rs, S s) {
     return RefreshIndicator(
       color: AppColors.primary,
       onRefresh: () => ref.read(reviewProvider.notifier).loadQueue(),
@@ -197,6 +199,7 @@ class _ReviewQueueScreenState extends ConsumerState<ReviewQueueScreen> {
             child: _ReviewCard(
               item: item,
               isExpanded: isExpanded,
+              s: s,
               onTapHeader: () => ref
                   .read(reviewProvider.notifier)
                   .toggleExpanded(item.attemptId),
@@ -233,6 +236,7 @@ class _ReviewQueueScreenState extends ConsumerState<ReviewQueueScreen> {
 class _ReviewCard extends StatelessWidget {
   final ReviewItem item;
   final bool isExpanded;
+  final S s;
   final VoidCallback onTapHeader;
   final VoidCallback onGotIt;
   final VoidCallback onStillConfused;
@@ -240,6 +244,7 @@ class _ReviewCard extends StatelessWidget {
   const _ReviewCard({
     required this.item,
     required this.isExpanded,
+    required this.s,
     required this.onTapHeader,
     required this.onGotIt,
     required this.onStillConfused,
@@ -372,7 +377,7 @@ class _ReviewCard extends StatelessWidget {
                       // Review count
                       if (item.reviewCount > 0)
                         _smallChip(
-                          'Reviewed ${item.reviewCount}x',
+                          '${s.reviewed}${item.reviewCount}x',
                           AppColors.textHint,
                         ),
                     ],
@@ -453,7 +458,7 @@ class _ReviewCard extends StatelessWidget {
             children: [
               Expanded(
                 child: _answerBox(
-                  label: 'Your Answer',
+                  label: s.yourAnswer,
                   option: item.selectedOption,
                   color: AppColors.wrong,
                 ),
@@ -461,7 +466,7 @@ class _ReviewCard extends StatelessWidget {
               const SizedBox(width: 10),
               Expanded(
                 child: _answerBox(
-                  label: 'Correct',
+                  label: s.correctLabel,
                   option: item.correctOption,
                   color: AppColors.correct,
                 ),
@@ -485,9 +490,9 @@ class _ReviewCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Explanation',
-                    style: TextStyle(
+                  Text(
+                    s.explanation,
+                    style: const TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w700,
                       color: AppColors.textSecondary,
@@ -524,7 +529,7 @@ class _ReviewCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Why ${item.selectedOption} is wrong',
+                    '${s.why}${item.selectedOption}${s.isWrong}',
                     style: const TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w700,
@@ -554,7 +559,7 @@ class _ReviewCard extends StatelessWidget {
                 child: OutlinedButton.icon(
                   onPressed: onStillConfused,
                   icon: const Icon(Icons.help_outline_rounded, size: 18),
-                  label: const Text('Still Confused'),
+                  label: Text(s.stillConfused),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppColors.warning,
                     side: const BorderSide(color: AppColors.warning),
@@ -570,7 +575,7 @@ class _ReviewCard extends StatelessWidget {
                 child: ElevatedButton.icon(
                   onPressed: onGotIt,
                   icon: const Icon(Icons.check_rounded, size: 18),
-                  label: const Text('Got It!'),
+                  label: Text(s.gotIt),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.correct,
                     foregroundColor: Colors.white,

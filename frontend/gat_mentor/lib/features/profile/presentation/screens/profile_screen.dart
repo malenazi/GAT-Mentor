@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/l10n/app_localizations.dart';
+import '../../../../core/l10n/locale_provider.dart';
 import '../../../../core/storage/secure_storage.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../providers/profile_provider.dart';
@@ -44,21 +46,22 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 
   Future<void> _confirmLogout() async {
+    final s = S.of(context);
     final shouldLogout = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Logout'),
-        content: const Text('Are you sure you want to log out?'),
+        title: Text(s.logout),
+        content: Text(s.logoutConfirm),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text(s.cancel),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
             style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.error),
-            child: const Text('Logout'),
+            child: Text(s.logout),
           ),
         ],
       ),
@@ -73,10 +76,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final s = S.of(context);
     final state = ref.watch(profileProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Profile')),
+      appBar: AppBar(title: Text(s.profile)),
       body: state.isLoading && state.user == null
           ? const Center(child: CircularProgressIndicator())
           : state.error != null && state.user == null
@@ -108,6 +112,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   // ---------------------------------------------------------------------------
 
   Widget _buildError(String message) {
+    final s = S.of(context);
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -121,7 +126,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             ElevatedButton(
               onPressed: () =>
                   ref.read(profileProvider.notifier).loadProfile(),
-              child: const Text('Retry'),
+              child: Text(s.retry),
             ),
           ],
         ),
@@ -192,12 +197,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   // ---------------------------------------------------------------------------
 
   Widget _buildStatsRow(ProfileState state) {
+    final s = S.of(context);
     final user = state.user;
     return Row(
       children: [
         Expanded(
           child: _StatCard(
-            label: 'Level',
+            label: s.level,
             value: _capitalizeLevel(user?.level ?? 'N/A'),
             icon: Icons.star_outline,
             color: AppColors.secondary,
@@ -206,7 +212,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         const SizedBox(width: 10),
         Expanded(
           child: _StatCard(
-            label: 'Days Active',
+            label: s.daysActive,
             value: '${state.daysActive}',
             icon: Icons.calendar_today_outlined,
             color: AppColors.primary,
@@ -215,7 +221,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         const SizedBox(width: 10),
         Expanded(
           child: _StatCard(
-            label: 'Questions',
+            label: s.questions,
             value: '${state.totalQuestionsDone}',
             icon: Icons.quiz_outlined,
             color: AppColors.success,
@@ -230,6 +236,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   // ---------------------------------------------------------------------------
 
   Widget _buildStreakCard(ProfileState state) {
+    final s = S.of(context);
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -252,9 +259,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Current Streak',
-                    style: TextStyle(
+                  Text(
+                    s.currentStreak,
+                    style: const TextStyle(
                       fontSize: 14,
                       color: AppColors.textSecondary,
                     ),
@@ -286,15 +293,16 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   // ---------------------------------------------------------------------------
 
   Widget _buildSettingsList(ProfileState state) {
+    final s = S.of(context);
     final user = state.user;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
-            const Text(
-              'Study Settings',
-              style: TextStyle(
+            Text(
+              s.studySettings,
+              style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
                 color: AppColors.textPrimary,
@@ -304,7 +312,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             TextButton.icon(
               onPressed: () => context.go(_settingsPath()),
               icon: const Icon(Icons.edit_outlined, size: 16),
-              label: const Text('Edit All'),
+              label: Text(s.editAll),
               style: TextButton.styleFrom(
                 foregroundColor: AppColors.primary,
                 textStyle: const TextStyle(
@@ -316,33 +324,44 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           ],
         ),
         const SizedBox(height: 4),
+        const SizedBox(height: 12),
+        Card(
+          child: ListTile(
+            leading: const Icon(Icons.language, color: AppColors.primary, size: 22),
+            title: Text(s.language, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: AppColors.textPrimary)),
+            subtitle: Text(s.isAr ? s.arabic : s.english, style: const TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+            trailing: const Icon(Icons.chevron_right, color: AppColors.primary),
+            onTap: () => ref.read(localeProvider.notifier).toggleLocale(),
+          ),
+        ),
+        const SizedBox(height: 12),
         Card(
           child: Column(
             children: [
               _SettingsTile(
                 icon: Icons.book_outlined,
-                title: 'Study Plan',
-                subtitle: 'Focus: ${_capitalizeLevel(user?.studyFocus ?? 'Both')}',
+                title: s.studyPlan,
+                subtitle: '${s.focus}: ${_capitalizeLevel(user?.studyFocus ?? 'Both')}',
                 onTap: () => context.go(_settingsPath()),
               ),
               const Divider(height: 1, indent: 56),
               _SettingsTile(
                 icon: Icons.event_outlined,
-                title: 'Exam Date',
-                subtitle: user?.examDate ?? 'Not set',
+                title: s.examDate,
+                subtitle: user?.examDate ?? s.notSet,
                 onTap: () => context.go(_settingsPath()),
               ),
               const Divider(height: 1, indent: 56),
               _SettingsTile(
                 icon: Icons.timer_outlined,
-                title: 'Daily Minutes',
+                title: s.dailyMinutes,
                 subtitle: '${user?.dailyMinutes ?? 45} minutes',
                 onTap: () => context.go(_settingsPath()),
               ),
               const Divider(height: 1, indent: 56),
               _SettingsTile(
                 icon: Icons.flag_outlined,
-                title: 'Target Score',
+                title: s.targetScore,
                 subtitle: '${user?.targetScore ?? 70}%',
                 onTap: () => context.go(_settingsPath()),
               ),
@@ -358,12 +377,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   // ---------------------------------------------------------------------------
 
   Widget _buildLogoutButton() {
+    final s = S.of(context);
     return SizedBox(
       width: double.infinity,
       child: OutlinedButton.icon(
         onPressed: _confirmLogout,
         icon: const Icon(Icons.logout, color: AppColors.error),
-        label: const Text('Logout'),
+        label: Text(s.logout),
         style: OutlinedButton.styleFrom(
           foregroundColor: AppColors.error,
           side: const BorderSide(color: AppColors.error),

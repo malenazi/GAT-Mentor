@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/l10n/app_localizations.dart';
 import '../../../../shared/widgets/loading_widget.dart';
 import '../../../../shared/widgets/error_display.dart';
 import '../providers/onboarding_provider.dart';
@@ -55,10 +56,11 @@ class _DiagnosticTestScreenState extends ConsumerState<DiagnosticTestScreen> {
     if (success) {
       context.go('/onboarding/result');
     } else {
+      final s = S.of(context);
       final error = ref.read(onboardingProvider).error;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(error ?? 'Submission failed'),
+          content: Text(error ?? s.submissionFailed),
           backgroundColor: AppColors.error,
         ),
       );
@@ -67,12 +69,13 @@ class _DiagnosticTestScreenState extends ConsumerState<DiagnosticTestScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final s = S.of(context);
     final state = ref.watch(onboardingProvider);
     final textTheme = Theme.of(context).textTheme;
 
     if (state.isLoading && state.diagnosticQuestions.isEmpty) {
-      return const Scaffold(
-        body: LoadingWidget(message: 'Loading diagnostic questions...'),
+      return Scaffold(
+        body: LoadingWidget(message: s.loadingDiagnostic),
       );
     }
 
@@ -88,8 +91,8 @@ class _DiagnosticTestScreenState extends ConsumerState<DiagnosticTestScreen> {
 
     final questions = state.diagnosticQuestions;
     if (questions.isEmpty) {
-      return const Scaffold(
-        body: LoadingWidget(message: 'Preparing questions...'),
+      return Scaffold(
+        body: LoadingWidget(message: s.preparingQuestions),
       );
     }
 
@@ -106,7 +109,7 @@ class _DiagnosticTestScreenState extends ConsumerState<DiagnosticTestScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('Diagnostic Assessment'),
+        title: Text(s.diagnosticAssessment),
         leading: IconButton(
           icon: const Icon(Icons.close),
           onPressed: () => _showExitDialog(context),
@@ -214,7 +217,7 @@ class _DiagnosticTestScreenState extends ConsumerState<DiagnosticTestScreen> {
                       onPressed: () =>
                           setState(() => _currentIndex--),
                       icon: const Icon(Icons.arrow_back, size: 18),
-                      label: const Text('Back'),
+                      label: Text(s.back),
                     )
                   else
                     const SizedBox.shrink(),
@@ -234,13 +237,13 @@ class _DiagnosticTestScreenState extends ConsumerState<DiagnosticTestScreen> {
                                 color: Colors.white,
                               ),
                             )
-                          : const Text('Submit'),
+                          : Text(s.submit),
                     )
                   else if (!isLastQuestion && selectedOption != null)
                     ElevatedButton.icon(
                       onPressed: () =>
                           setState(() => _currentIndex++),
-                      icon: const Text('Next'),
+                      icon: Text(s.next),
                       label: const Icon(Icons.arrow_forward, size: 18),
                     ),
                 ],
@@ -270,26 +273,25 @@ class _DiagnosticTestScreenState extends ConsumerState<DiagnosticTestScreen> {
   }
 
   void _showExitDialog(BuildContext context) {
+    final s = S.of(context);
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('Leave Diagnostic?'),
-        content: const Text(
-          'Your progress will be lost. Are you sure you want to leave?',
-        ),
+        title: Text(s.leaveDiagnostic),
+        content: Text(s.diagnosticLeaveWarning),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(s.cancel),
           ),
           TextButton(
             onPressed: () {
               Navigator.pop(context);
               context.go('/onboarding');
             },
-            child: const Text(
-              'Leave',
-              style: TextStyle(color: AppColors.error),
+            child: Text(
+              s.leave,
+              style: const TextStyle(color: AppColors.error),
             ),
           ),
         ],

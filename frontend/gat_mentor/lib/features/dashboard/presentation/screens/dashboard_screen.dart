@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/l10n/app_localizations.dart';
 import '../providers/dashboard_provider.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
@@ -60,6 +61,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final s = S.of(context);
     final state = ref.watch(dashboardProvider);
     final screenWidth = MediaQuery.of(context).size.width;
     final isTablet = screenWidth >= 600;
@@ -116,6 +118,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   // =========================================================================
 
   Widget _buildGradientHeader(DashboardState state) {
+    final s = S.of(context);
     return SliverToBoxAdapter(
       child: Container(
         width: double.infinity,
@@ -142,9 +145,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'Your Dashboard',
-                            style: TextStyle(
+                          Text(
+                            s.yourDashboard,
+                            style: const TextStyle(
                               fontSize: 26,
                               fontWeight: FontWeight.w800,
                               color: Colors.white,
@@ -213,19 +216,20 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   }
 
   String _getMotivationalMessage(DashboardState state) {
+    final s = S.of(context);
     if (state.totalQuestionsDone == 0) {
-      return 'Start your first practice session!';
+      return s.startFirstPractice;
     }
     if (state.overallAccuracy >= 80) {
-      return 'Amazing work! Keep pushing for mastery!';
+      return s.amazingWork;
     }
     if (state.overallAccuracy >= 60) {
-      return 'Great progress! You\'re getting stronger!';
+      return s.greatProgress;
     }
     if (state.streak >= 3) {
-      return '${state.streak}-day streak! Don\'t break it!';
+      return '${state.streak}${s.dontBreakStreak}';
     }
-    return 'Every question makes you better. Keep going!';
+    return s.everyQuestionMatters;
   }
 
   // =========================================================================
@@ -233,6 +237,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   // =========================================================================
 
   Widget _buildError(String message) {
+    final s = S.of(context);
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -251,7 +256,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             ElevatedButton(
               onPressed: () =>
                   ref.read(dashboardProvider.notifier).loadDashboard(),
-              child: const Text('Retry'),
+              child: Text(s.retry),
             ),
           ],
         ),
@@ -264,6 +269,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   // =========================================================================
 
   Widget _buildSummaryCards(DashboardState state, bool isTablet) {
+    final s = S.of(context);
     final studyHours = state.totalStudyMinutes ~/ 60;
     final studyMins = state.totalStudyMinutes % 60;
     final studyTimeStr = studyHours > 0 ? '${studyHours}h ${studyMins}m' : '${studyMins}m';
@@ -271,38 +277,38 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     final cards = [
       _SummaryCardData(
         icon: Icons.quiz_outlined,
-        label: 'Questions',
+        label: s.questions,
         value: '${state.totalQuestionsDone}',
         color: AppColors.primary,
       ),
       _SummaryCardData(
         icon: Icons.gps_fixed,
-        label: 'Accuracy',
+        label: s.accuracy,
         value: '${state.overallAccuracy.toStringAsFixed(1)}%',
         color: AppColors.success,
       ),
       _SummaryCardData(
         icon: Icons.timer_outlined,
-        label: 'Avg Time',
+        label: s.avgTime,
         value: '${state.avgTime.toStringAsFixed(1)}s',
         color: AppColors.warning,
       ),
       _SummaryCardData(
         icon: Icons.local_fire_department_outlined,
-        label: 'Streak',
-        value: '${state.streak} days',
+        label: s.streak,
+        value: '${state.streak} ${s.days}',
         color: AppColors.error,
       ),
       _SummaryCardData(
         icon: Icons.school_outlined,
-        label: 'Study Time',
+        label: s.studyTime,
         value: studyTimeStr,
         color: AppColors.secondary,
       ),
       _SummaryCardData(
         icon: Icons.emoji_events_outlined,
-        label: 'Best Streak',
-        value: '${state.longestStreak} days',
+        label: s.bestStreak,
+        value: '${state.longestStreak} ${s.days}',
         color: const Color(0xFFD97706),
       ),
     ];
@@ -338,6 +344,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   // =========================================================================
 
   Widget _buildTopicPerformanceSection(DashboardState state) {
+    final s = S.of(context);
     final topics = state.topicPerformances;
     if (topics.isEmpty) return const SizedBox.shrink();
 
@@ -356,21 +363,21 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                   size: 20, color: AppColors.primary),
             ),
             const SizedBox(width: 10),
-            const Expanded(
+            Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Topic Performance',
-                    style: TextStyle(
+                    s.topicPerformance,
+                    style: const TextStyle(
                       fontSize: 19,
                       fontWeight: FontWeight.w700,
                       color: AppColors.textPrimary,
                     ),
                   ),
                   Text(
-                    'How you\'re doing across each GAT section',
-                    style: TextStyle(
+                    s.topicPerformanceDesc,
+                    style: const TextStyle(
                         fontSize: 13, color: AppColors.textSecondary),
                   ),
                 ],
@@ -403,6 +410,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   }
 
   Widget _buildTopicCard(TopicPerformance topic) {
+    final s = S.of(context);
     final color = _topicColor(topic.topicName);
     final icon = _topicIcon(topic.topicName);
     final masteryPercent = (topic.mastery * 100).clamp(0, 100).toDouble();
@@ -490,7 +498,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                   Row(
                     children: [
                       _StatChip(
-                        label: 'Accuracy',
+                        label: s.accuracy,
                         value: '${accuracyPercent.toStringAsFixed(0)}%',
                         color: accuracyPercent >= 60
                             ? AppColors.success
@@ -498,13 +506,13 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                       ),
                       const SizedBox(width: 8),
                       _StatChip(
-                        label: 'Questions',
+                        label: s.questions,
                         value: '${topic.totalAttempts}',
                         color: AppColors.textSecondary,
                       ),
                       const SizedBox(width: 8),
                       _StatChip(
-                        label: 'Mastered',
+                        label: s.mastered,
                         value: '${topic.masteredCount}/${topic.conceptCount}',
                         color: topic.masteredCount == topic.conceptCount
                             ? AppColors.success
@@ -526,7 +534,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                       icon: Icon(Icons.play_arrow_rounded,
                           size: 18, color: color),
                       label: Text(
-                        'Practice ${topic.topicName}',
+                        '${s.practice} ${topic.topicName}',
                         style: TextStyle(
                           color: color,
                           fontWeight: FontWeight.w600,
@@ -555,13 +563,14 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   Widget _buildConceptMiniBars(
       List<Map<String, dynamic>> concepts, Color topicColor) {
     if (concepts.isEmpty) return const SizedBox.shrink();
+    final s = S.of(context);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Concepts',
-          style: TextStyle(
+        Text(
+          s.concepts,
+          style: const TextStyle(
             fontSize: 11,
             fontWeight: FontWeight.w600,
             color: AppColors.textHint,
@@ -629,6 +638,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   // =========================================================================
 
   Widget _buildFocusSection(DashboardState state) {
+    final s = S.of(context);
     final recommendations = state.focusRecommendations;
 
     return Column(
@@ -646,21 +656,21 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                   size: 20, color: AppColors.error),
             ),
             const SizedBox(width: 10),
-            const Expanded(
+            Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'What to Focus On',
-                    style: TextStyle(
+                    s.whatToFocus,
+                    style: const TextStyle(
                       fontSize: 19,
                       fontWeight: FontWeight.w700,
                       color: AppColors.textPrimary,
                     ),
                   ),
                   Text(
-                    'Concepts that need your attention most',
-                    style: TextStyle(
+                    s.focusDesc,
+                    style: const TextStyle(
                         fontSize: 13, color: AppColors.textSecondary),
                   ),
                 ],
@@ -696,6 +706,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   }
 
   Widget _buildCongratulationsCard() {
+    final s = S.of(context);
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
@@ -709,27 +720,27 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.success.withOpacity(0.2)),
       ),
-      child: const Row(
+      child: Row(
         children: [
-          Icon(Icons.celebration_rounded,
+          const Icon(Icons.celebration_rounded,
               size: 32, color: AppColors.success),
-          SizedBox(width: 14),
+          const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'You\'re on fire!',
-                  style: TextStyle(
+                  s.onFire,
+                  style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
                     color: AppColors.success,
                   ),
                 ),
-                SizedBox(height: 2),
+                const SizedBox(height: 2),
                 Text(
-                  'All concepts are at a great level. Keep practicing to maintain mastery!',
-                  style: TextStyle(
+                  s.allConceptsGreat,
+                  style: const TextStyle(
                       fontSize: 13, color: AppColors.textSecondary),
                 ),
               ],
@@ -745,6 +756,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   }
 
   Widget _buildRecommendationCard(FocusRecommendation rec) {
+    final s = S.of(context);
     final concept = rec.concept;
     final mastery = (concept['mastery'] ?? 0).toDouble().clamp(0.0, 1.0);
     final accuracy = (concept['accuracy'] ?? 0).toDouble().clamp(0.0, 1.0);
@@ -832,7 +844,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                           color: masteryColor),
                       const SizedBox(width: 16),
                       _MiniStat(
-                          label: 'Accuracy',
+                          label: s.accuracy,
                           value:
                               '${(accuracy * 100).toStringAsFixed(0)}%',
                           color: accuracy >= 0.6
@@ -871,6 +883,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   // =========================================================================
 
   Widget _buildMasteryMapSection(DashboardState state) {
+    final s = S.of(context);
     if (state.masteryMap.isEmpty) return const SizedBox.shrink();
 
     return Column(
@@ -888,21 +901,21 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                   size: 20, color: AppColors.secondary),
             ),
             const SizedBox(width: 10),
-            const Expanded(
+            Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Mastery Map',
-                    style: TextStyle(
+                    s.masteryMap,
+                    style: const TextStyle(
                       fontSize: 19,
                       fontWeight: FontWeight.w700,
                       color: AppColors.textPrimary,
                     ),
                   ),
                   Text(
-                    'Detailed concept-level breakdown',
-                    style: TextStyle(
+                    s.masteryMapDesc,
+                    style: const TextStyle(
                         fontSize: 13, color: AppColors.textSecondary),
                   ),
                 ],
@@ -1216,6 +1229,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   // =========================================================================
 
   Widget _buildAccuracyTrendChart(DashboardState state) {
+    final s = S.of(context);
     if (state.trends.isEmpty) return const SizedBox.shrink();
 
     final spots = <FlSpot>[];
@@ -1255,21 +1269,21 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                       size: 20, color: AppColors.primary),
                 ),
                 const SizedBox(width: 10),
-                const Expanded(
+                Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Accuracy Trend',
-                        style: TextStyle(
+                        s.accuracyTrend,
+                        style: const TextStyle(
                           fontSize: 17,
                           fontWeight: FontWeight.w700,
                           color: AppColors.textPrimary,
                         ),
                       ),
                       Text(
-                        'Your accuracy over the last 7 days',
-                        style: TextStyle(
+                        s.accuracyTrendDesc,
+                        style: const TextStyle(
                             fontSize: 12, color: AppColors.textSecondary),
                       ),
                     ],
@@ -1407,14 +1421,15 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   // =========================================================================
 
   Widget _buildPracticeWeakButton() {
+    final s = S.of(context);
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton.icon(
         onPressed: () => context.go('/practice'),
         icon: const Icon(Icons.fitness_center),
-        label: const Text(
-          'Practice Weak Topics',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+        label: Text(
+          s.practiceWeakTopics,
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
         ),
         style: ElevatedButton.styleFrom(
           padding: const EdgeInsets.symmetric(vertical: 16),

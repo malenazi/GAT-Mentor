@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/l10n/app_localizations.dart';
 import '../../../../shared/widgets/loading_widget.dart';
 import '../../../../shared/widgets/error_display.dart';
 import '../providers/home_provider.dart';
@@ -28,12 +29,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final s = S.of(context);
     final state = ref.watch(homeProvider);
     final textTheme = Theme.of(context).textTheme;
 
     if (state.isLoading && state.plan == null) {
-      return const Scaffold(
-        body: LoadingWidget(message: 'Loading your plan...'),
+      return Scaffold(
+        body: LoadingWidget(message: s.loadingPlan),
       );
     }
 
@@ -64,14 +66,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    _greeting(),
+                    _greeting(s),
                     style: textTheme.bodyMedium?.copyWith(
                       color: AppColors.textSecondary,
                     ),
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    _userName(state),
+                    _userName(state, s),
                     style: textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: AppColors.textPrimary,
@@ -104,14 +106,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Today\'s Plan',
+                      s.todaysPlan,
                       style: textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w700,
                         color: AppColors.textPrimary,
                       ),
                     ),
                     Text(
-                      '${state.completedCount}/${state.totalCount} done',
+                      '${state.completedCount}/${state.totalCount} ${s.done}',
                       style: textTheme.bodySmall?.copyWith(
                         color: AppColors.textSecondary,
                         fontWeight: FontWeight.w500,
@@ -154,7 +156,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
                 child: Text(
-                  'Quick Actions',
+                  s.quickActions,
                   style: textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w700,
                     color: AppColors.textPrimary,
@@ -172,7 +174,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     Expanded(
                       child: _QuickActionButton(
                         icon: Icons.quiz_outlined,
-                        label: 'Practice',
+                        label: s.practice,
                         color: AppColors.primary,
                         onTap: () => context.go('/practice'),
                       ),
@@ -181,7 +183,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     Expanded(
                       child: _QuickActionButton(
                         icon: Icons.refresh_outlined,
-                        label: 'Review',
+                        label: s.review,
                         color: AppColors.warning,
                         onTap: () => context.go('/review'),
                       ),
@@ -190,7 +192,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     Expanded(
                       child: _QuickActionButton(
                         icon: Icons.timer_outlined,
-                        label: 'Timed Set',
+                        label: s.timedSet,
                         color: AppColors.secondary,
                         onTap: () => context.go('/simulation'),
                       ),
@@ -207,19 +209,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   // ─── Helpers ──────────────────────────────────────────────────────────
 
-  String _greeting() {
+  String _greeting(S s) {
     final hour = DateTime.now().hour;
-    if (hour < 12) return 'Good morning';
-    if (hour < 17) return 'Good afternoon';
-    return 'Good evening';
+    if (hour < 12) return s.goodMorning;
+    if (hour < 17) return s.goodAfternoon;
+    return s.goodEvening;
   }
 
-  String _userName(HomeState state) {
+  String _userName(HomeState state, S s) {
     final name = state.plan?['user_name'] as String? ??
         state.plan?['name'] as String? ??
         state.streak?['user_name'] as String?;
     if (name != null && name.isNotEmpty) return name;
-    return 'Student';
+    return s.student;
   }
 
   void _navigateToPractice(BuildContext context, Map<String, dynamic> item) {
@@ -287,6 +289,7 @@ class _ProgressCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final s = S.of(context);
     final completed = state.completedCount;
     final total = state.totalCount;
     final progress = total > 0 ? completed / total : 0.0;
@@ -311,9 +314,9 @@ class _ProgressCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Today\'s Progress',
-            style: TextStyle(
+          Text(
+            s.todaysProgress,
+            style: const TextStyle(
               fontSize: 14,
               color: Colors.white70,
               fontWeight: FontWeight.w500,
@@ -331,9 +334,9 @@ class _ProgressCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              const Text(
-                'tasks completed',
-                style: TextStyle(fontSize: 14, color: Colors.white70),
+              Text(
+                s.tasksCompleted,
+                style: const TextStyle(fontSize: 14, color: Colors.white70),
               ),
             ],
           ),
@@ -370,9 +373,10 @@ class _PlanItemCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final s = S.of(context);
     final type = (item['type'] as String?) ?? 'practice';
     final concept =
-        item['concept'] as String? ?? item['topic'] as String? ?? 'Practice';
+        item['concept'] as String? ?? item['topic'] as String? ?? s.practice;
     final duration = item['duration_minutes'] as int? ??
         item['duration'] as int? ??
         10;
@@ -380,7 +384,7 @@ class _PlanItemCard extends StatelessWidget {
         item['question_count'] as int? ?? item['questions'] as int? ?? 5;
     final isCompleted = item['completed'] == true;
 
-    final typeInfo = _typeInfo(type);
+    final typeInfo = _typeInfo(type, s);
 
     return Material(
       color: Colors.transparent,
@@ -481,29 +485,29 @@ class _PlanItemCard extends StatelessWidget {
     );
   }
 
-  _TypeInfo _typeInfo(String type) {
+  _TypeInfo _typeInfo(String type, S s) {
     switch (type.toLowerCase()) {
       case 'warm_up':
       case 'warmup':
       case 'warm-up':
-        return _TypeInfo(Icons.wb_sunny_outlined, 'Warm-up', AppColors.warning);
+        return _TypeInfo(Icons.wb_sunny_outlined, s.warmUp, AppColors.warning);
       case 'weak_topic':
       case 'weak_drill':
       case 'weak-topic':
         return _TypeInfo(
-            Icons.gps_fixed_outlined, 'Weak Topic', AppColors.error);
+            Icons.gps_fixed_outlined, s.weakTopic, AppColors.error);
       case 'timed_sprint':
       case 'timed':
       case 'sprint':
         return _TypeInfo(
-            Icons.timer_outlined, 'Timed Sprint', AppColors.secondary);
+            Icons.timer_outlined, s.timedSprint, AppColors.secondary);
       case 'mistake_review':
       case 'review':
         return _TypeInfo(
-            Icons.refresh_outlined, 'Review', AppColors.info);
+            Icons.refresh_outlined, s.review, AppColors.info);
       default:
         return _TypeInfo(
-            Icons.quiz_outlined, 'Practice', AppColors.primary);
+            Icons.quiz_outlined, s.practice, AppColors.primary);
     }
   }
 }
@@ -545,6 +549,7 @@ class _EmptyPlan extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final s = S.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 32),
       child: Container(
@@ -562,19 +567,19 @@ class _EmptyPlan extends StatelessWidget {
               color: AppColors.textHint.withOpacity(0.5),
             ),
             const SizedBox(height: 16),
-            const Text(
-              'No plan for today',
-              style: TextStyle(
+            Text(
+              s.noPlanToday,
+              style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
                 color: AppColors.textPrimary,
               ),
             ),
             const SizedBox(height: 4),
-            const Text(
-              'Start practicing to generate your\npersonalized study plan.',
+            Text(
+              s.startPracticingPrompt,
               textAlign: TextAlign.center,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 14,
                 color: AppColors.textSecondary,
                 height: 1.5,

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/l10n/app_localizations.dart';
 import '../../../../shared/widgets/error_display.dart';
 import '../../../../shared/widgets/loading_widget.dart';
 import '../providers/admin_provider.dart';
@@ -26,13 +27,14 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final s = S.of(context);
     final state = ref.watch(adminDashboardProvider);
 
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
         child: state.isLoading && state.totalUsers == 0
-            ? const LoadingWidget(message: 'Loading admin stats...')
+            ? LoadingWidget(message: s.loadingAdminStats)
             : state.error != null && state.totalUsers == 0
                 ? ErrorDisplay(
                     message: state.error!,
@@ -56,7 +58,7 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Admin Dashboard',
+                                s.adminDashboardTitle,
                                 style: Theme.of(context)
                                     .textTheme
                                     .titleLarge
@@ -67,7 +69,7 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
                               ),
                               const SizedBox(height: 2),
                               Text(
-                                'Platform overview',
+                                s.platformOverview,
                                 style: Theme.of(context)
                                     .textTheme
                                     .bodyMedium
@@ -87,15 +89,15 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
                                   color: AppColors.error.withOpacity(0.1),
                                   borderRadius: BorderRadius.circular(20),
                                 ),
-                                child: const Row(
+                                child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Icon(Icons.admin_panel_settings,
+                                    const Icon(Icons.admin_panel_settings,
                                         size: 18, color: AppColors.error),
-                                    SizedBox(width: 4),
+                                    const SizedBox(width: 4),
                                     Text(
-                                      'Admin',
-                                      style: TextStyle(
+                                      s.admin,
+                                      style: const TextStyle(
                                         fontSize: 13,
                                         fontWeight: FontWeight.w700,
                                         color: AppColors.error,
@@ -118,25 +120,25 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
                             childAspectRatio: 1.3,
                             children: [
                               _StatCard(
-                                title: 'Total Users',
+                                title: s.totalUsers,
                                 value: '${state.totalUsers}',
                                 icon: Icons.people_outline,
                                 color: AppColors.primary,
                               ),
                               _StatCard(
-                                title: 'Active Questions',
+                                title: s.activeQuestions,
                                 value: '${state.totalQuestions}',
                                 icon: Icons.quiz_outlined,
                                 color: AppColors.secondary,
                               ),
                               _StatCard(
-                                title: 'Total Attempts',
+                                title: s.totalAttempts,
                                 value: _formatNumber(state.totalAttempts),
                                 icon: Icons.touch_app_outlined,
                                 color: AppColors.success,
                               ),
                               _StatCard(
-                                title: 'Avg Mastery',
+                                title: s.avgMastery,
                                 value:
                                     '${(state.avgMastery * 100).toStringAsFixed(1)}%',
                                 icon: Icons.trending_up_rounded,
@@ -168,7 +170,7 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
                                           color: AppColors.primary),
                                       const SizedBox(width: 8),
                                       Text(
-                                        'Admin Actions',
+                                        s.adminActions,
                                         style: TextStyle(
                                           fontSize: 16,
                                           fontWeight: FontWeight.w700,
@@ -180,17 +182,17 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
                                   const SizedBox(height: 16),
                                   _ActionRow(
                                     icon: Icons.list_alt_rounded,
-                                    label: 'Manage Questions',
+                                    label: s.manageQuestions,
                                     subtitle:
-                                        'View, edit, or deactivate questions',
+                                        s.manageQuestionsDesc,
                                     onTap: () =>
                                         context.go('/admin/questions'),
                                   ),
                                   const Divider(height: 24),
                                   _ActionRow(
                                     icon: Icons.upload_file_rounded,
-                                    label: 'Bulk Upload',
-                                    subtitle: 'Upload questions via API',
+                                    label: s.bulkUpload,
+                                    subtitle: s.bulkUploadDesc,
                                     onTap: () {},
                                   ),
                                 ],

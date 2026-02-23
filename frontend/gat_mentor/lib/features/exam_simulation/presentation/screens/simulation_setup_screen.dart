@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/l10n/app_localizations.dart';
 import '../providers/simulation_provider.dart';
 
 class SimulationSetupScreen extends ConsumerStatefulWidget {
@@ -53,38 +54,39 @@ class _SimulationSetupScreenState
 
   @override
   Widget build(BuildContext context) {
+    final s = S.of(context);
     final state = ref.watch(simulationProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Exam Simulation')),
+      appBar: AppBar(title: Text(s.examSimulation)),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Header
-            const Center(
+            Center(
               child: Column(
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.assignment_outlined,
                     size: 64,
                     color: AppColors.primary,
                   ),
-                  SizedBox(height: 12),
+                  const SizedBox(height: 12),
                   Text(
-                    'Simulate a Real Exam',
-                    style: TextStyle(
+                    s.simulateRealExam,
+                    style: const TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.w700,
                       color: AppColors.textPrimary,
                     ),
                   ),
-                  SizedBox(height: 6),
+                  const SizedBox(height: 6),
                   Text(
-                    'No hints, no immediate feedback.\nTest yourself under exam conditions.',
+                    s.simulationDesc,
                     textAlign: TextAlign.center,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 14,
                       color: AppColors.textSecondary,
                       height: 1.5,
@@ -97,9 +99,9 @@ class _SimulationSetupScreenState
             const SizedBox(height: 32),
 
             // Question Count
-            const Text(
-              'Number of Questions',
-              style: TextStyle(
+            Text(
+              s.numberOfQuestions,
+              style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
                 color: AppColors.textPrimary,
@@ -128,9 +130,9 @@ class _SimulationSetupScreenState
             const SizedBox(height: 28),
 
             // Topic Filter (optional)
-            const Text(
-              'Filter by Topic (Optional)',
-              style: TextStyle(
+            Text(
+              s.filterByTopic,
+              style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
                 color: AppColors.textPrimary,
@@ -139,14 +141,14 @@ class _SimulationSetupScreenState
             const SizedBox(height: 12),
             DropdownButtonFormField<int?>(
               value: _selectedTopicId,
-              decoration: const InputDecoration(
-                hintText: 'All Topics',
-                prefixIcon: Icon(Icons.topic_outlined),
+              decoration: InputDecoration(
+                hintText: s.allTopics,
+                prefixIcon: const Icon(Icons.topic_outlined),
               ),
               items: [
-                const DropdownMenuItem<int?>(
+                DropdownMenuItem<int?>(
                   value: null,
-                  child: Text('All Topics'),
+                  child: Text(s.allTopics),
                 ),
                 ..._topics.map((t) => DropdownMenuItem<int?>(
                       value: t['id'] as int,
@@ -161,9 +163,9 @@ class _SimulationSetupScreenState
             const SizedBox(height: 28),
 
             // Difficulty (optional)
-            const Text(
-              'Difficulty Preference (Optional)',
-              style: TextStyle(
+            Text(
+              s.difficultyPreference,
+              style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
                 color: AppColors.textPrimary,
@@ -172,14 +174,14 @@ class _SimulationSetupScreenState
             const SizedBox(height: 12),
             DropdownButtonFormField<String?>(
               value: _selectedDifficulty,
-              decoration: const InputDecoration(
-                hintText: 'Mixed',
-                prefixIcon: Icon(Icons.speed_outlined),
+              decoration: InputDecoration(
+                hintText: s.mixed,
+                prefixIcon: const Icon(Icons.speed_outlined),
               ),
               items: [
-                const DropdownMenuItem<String?>(
+                DropdownMenuItem<String?>(
                   value: null,
-                  child: Text('Mixed'),
+                  child: Text(s.mixed),
                 ),
                 ..._difficulties.map((d) => DropdownMenuItem<String?>(
                       value: d,
@@ -207,8 +209,7 @@ class _SimulationSetupScreenState
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        'You will have ${_questionCount * 90 ~/ 60} minutes '
-                        'to complete $_questionCount questions.',
+                        s.youWillHave(_questionCount * 90 ~/ 60, _questionCount),
                         style: const TextStyle(
                           fontSize: 13,
                           color: AppColors.textSecondary,
@@ -265,7 +266,7 @@ class _SimulationSetupScreenState
                         ),
                       )
                     : const Icon(Icons.play_arrow),
-                label: Text(_isStarting ? 'Starting...' : 'Start Simulation'),
+                label: Text(_isStarting ? s.starting : s.startSimulation),
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
                 ),

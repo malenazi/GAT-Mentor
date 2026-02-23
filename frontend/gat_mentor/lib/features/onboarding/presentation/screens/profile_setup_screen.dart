@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/l10n/app_localizations.dart';
 import '../providers/onboarding_provider.dart';
 
 class ProfileSetupScreen extends ConsumerStatefulWidget {
@@ -62,13 +63,14 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final s = S.of(context);
     final state = ref.watch(onboardingProvider);
     final textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('Set Up Your Profile'),
+        title: Text(s.setupProfile),
         leading: _currentPage > 0
             ? IconButton(
                 icon: const Icon(Icons.arrow_back),
@@ -163,8 +165,8 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                         )
                       : Text(
                           _currentPage < _totalPages - 1
-                              ? 'Continue'
-                              : 'Start Diagnostic',
+                              ? s.continueText
+                              : s.startDiagnostic,
                         ),
                 ),
               ),
@@ -193,6 +195,7 @@ class _StudyFocusPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final s = S.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Column(
@@ -200,7 +203,7 @@ class _StudyFocusPage extends StatelessWidget {
         children: [
           const SizedBox(height: 32),
           Text(
-            'What would you like\nto focus on?',
+            s.whatFocus,
             style: textTheme.headlineSmall?.copyWith(
               fontWeight: FontWeight.bold,
               color: AppColors.textPrimary,
@@ -208,7 +211,7 @@ class _StudyFocusPage extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Choose the area you want to improve',
+            s.chooseFocusArea,
             style: textTheme.bodyMedium?.copyWith(
               color: AppColors.textSecondary,
             ),
@@ -216,8 +219,8 @@ class _StudyFocusPage extends StatelessWidget {
           const SizedBox(height: 32),
           _FocusCard(
             icon: Icons.calculate_outlined,
-            label: 'Quantitative',
-            description: 'Numbers, algebra, geometry & data',
+            label: s.quantitative,
+            description: s.quantDesc,
             value: 'quant',
             selected: selected,
             onTap: onChanged,
@@ -225,8 +228,8 @@ class _StudyFocusPage extends StatelessWidget {
           const SizedBox(height: 12),
           _FocusCard(
             icon: Icons.menu_book_outlined,
-            label: 'Verbal',
-            description: 'Reading, vocabulary & reasoning',
+            label: s.verbal,
+            description: s.verbalDesc,
             value: 'verbal',
             selected: selected,
             onTap: onChanged,
@@ -234,8 +237,8 @@ class _StudyFocusPage extends StatelessWidget {
           const SizedBox(height: 12),
           _FocusCard(
             icon: Icons.auto_awesome_outlined,
-            label: 'Both',
-            description: 'Complete GAT preparation',
+            label: s.both,
+            description: s.bothDesc,
             value: 'both',
             selected: selected,
             onTap: onChanged,
@@ -355,6 +358,7 @@ class _LevelPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final s = S.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Column(
@@ -362,7 +366,7 @@ class _LevelPage extends StatelessWidget {
         children: [
           const SizedBox(height: 32),
           Text(
-            'How would you describe\nyour current level?',
+            s.describeLevel,
             style: textTheme.headlineSmall?.copyWith(
               fontWeight: FontWeight.bold,
               color: AppColors.textPrimary,
@@ -370,7 +374,7 @@ class _LevelPage extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'This helps us personalize your starting point',
+            s.personalizeStart,
             style: textTheme.bodyMedium?.copyWith(
               color: AppColors.textSecondary,
             ),
@@ -378,8 +382,8 @@ class _LevelPage extends StatelessWidget {
           const SizedBox(height: 32),
           _LevelCard(
             icon: Icons.trending_up,
-            label: 'Beginner',
-            description: 'Just starting out or need a refresher',
+            label: s.beginner,
+            description: s.beginnerDesc,
             value: 'beginner',
             color: AppColors.info,
             selected: selected,
@@ -388,8 +392,8 @@ class _LevelPage extends StatelessWidget {
           const SizedBox(height: 12),
           _LevelCard(
             icon: Icons.speed,
-            label: 'Average',
-            description: 'Comfortable but want to improve',
+            label: s.average,
+            description: s.averageDesc,
             value: 'average',
             color: AppColors.warning,
             selected: selected,
@@ -398,8 +402,8 @@ class _LevelPage extends StatelessWidget {
           const SizedBox(height: 12),
           _LevelCard(
             icon: Icons.star_outline,
-            label: 'High Scorer',
-            description: 'Strong foundation, aiming for top marks',
+            label: s.highScorer,
+            description: s.highScorerDesc,
             value: 'high_scorer',
             color: AppColors.success,
             selected: selected,
@@ -551,6 +555,7 @@ class _ExamDatePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final s = S.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Column(
@@ -558,7 +563,7 @@ class _ExamDatePage extends StatelessWidget {
         children: [
           const SizedBox(height: 32),
           Text(
-            'When is your\nGAT exam?',
+            s.whenExam,
             style: textTheme.headlineSmall?.copyWith(
               fontWeight: FontWeight.bold,
               color: AppColors.textPrimary,
@@ -566,7 +571,7 @@ class _ExamDatePage extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'We\'ll create a study plan around your deadline',
+            s.studyPlanDeadline,
             style: textTheme.bodyMedium?.copyWith(
               color: AppColors.textSecondary,
             ),
@@ -600,7 +605,7 @@ class _ExamDatePage extends StatelessWidget {
                   Text(
                     selectedDate != null
                         ? _formatDate(selectedDate!)
-                        : 'Tap to select a date',
+                        : s.tapSelectDate,
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w600,
@@ -628,7 +633,7 @@ class _ExamDatePage extends StatelessWidget {
             child: TextButton(
               onPressed: () => onChanged(null),
               child: Text(
-                'I don\'t have a date yet',
+                s.noDateYet,
                 style: TextStyle(
                   color: AppColors.textSecondary,
                   decoration: selectedDate == null
@@ -672,6 +677,7 @@ class _GoalsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final s = S.of(context);
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Column(
@@ -679,7 +685,7 @@ class _GoalsPage extends StatelessWidget {
         children: [
           const SizedBox(height: 32),
           Text(
-            'Set your study goals',
+            s.setStudyGoals,
             style: textTheme.headlineSmall?.copyWith(
               fontWeight: FontWeight.bold,
               color: AppColors.textPrimary,
@@ -687,7 +693,7 @@ class _GoalsPage extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'You can always change these later in settings',
+            s.changeInSettings,
             style: textTheme.bodyMedium?.copyWith(
               color: AppColors.textSecondary,
             ),
@@ -719,9 +725,9 @@ class _GoalsPage extends StatelessWidget {
                           color: AppColors.primary, size: 22),
                     ),
                     const SizedBox(width: 12),
-                    const Text(
-                      'Daily Study Time',
-                      style: TextStyle(
+                    Text(
+                      s.dailyStudyTime,
+                      style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
                         color: AppColors.textPrimary,
@@ -799,9 +805,9 @@ class _GoalsPage extends StatelessWidget {
                           color: AppColors.secondary, size: 22),
                     ),
                     const SizedBox(width: 12),
-                    const Text(
-                      'Target Score',
-                      style: TextStyle(
+                    Text(
+                      s.targetScore,
+                      style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
                         color: AppColors.textPrimary,
