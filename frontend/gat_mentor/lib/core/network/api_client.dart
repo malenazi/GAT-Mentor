@@ -6,8 +6,23 @@ import '../storage/secure_storage.dart';
 class ApiClient {
   late final Dio dio;
 
+  /// On web, build an absolute URL from the current page origin so Dio
+  /// works both on the Flutter dev-server (proxied or same-origin) and in
+  /// production where the backend serves the SPA.
+  static String _resolveBaseUrl() {
+    if (!kIsWeb) return ApiConstants.baseUrl;
+    try {
+      final uri = Uri.base;
+      final origin =
+          '${uri.scheme}://${uri.host}${uri.hasPort ? ':${uri.port}' : ''}';
+      return '$origin/api/v1';
+    } catch (_) {
+      return ApiConstants.webBaseUrl;
+    }
+  }
+
   ApiClient() {
-    final baseUrl = kIsWeb ? ApiConstants.webBaseUrl : ApiConstants.baseUrl;
+    final baseUrl = _resolveBaseUrl();
 
     dio = Dio(BaseOptions(
       baseUrl: baseUrl,
